@@ -1,0 +1,75 @@
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QAction, QVBoxLayout, QWidget, QHBoxLayout, QSplitter
+import sys
+
+
+class MainApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Signi")
+        self.resize(1080, 720)
+        self.setWindowState(Qt.WindowMaximized)
+
+        self.controlBar = QWidget()
+        self.controlBar.setStyleSheet("background:red;")
+        self.composer = QWidget()
+        self.composer.setStyleSheet("background:blue;")
+        self.originalSignal = QWidget()
+        self.originalSignal.setStyleSheet("background:black;")
+        self.reconstructedSignal = QWidget()
+        self.reconstructedSignal.setStyleSheet("background:purple;")
+        self.diffrenceGraph = QWidget()
+        self.diffrenceGraph.setStyleSheet("background:light blue;")
+        self.frequencyDomain = QWidget()
+        self.frequencyDomain.setStyleSheet("background:dark grey;")
+
+        self.mainLayout = QVBoxLayout()
+        self.controlBarLayout = QHBoxLayout()
+        self.workspace = QHBoxLayout()
+        self.graphsLayout = QVBoxLayout()
+        self.workspace = QHBoxLayout()
+        self.composerLayout = QVBoxLayout()
+        self.graphsLayout = QVBoxLayout()
+        self.originalSignalLayout = QHBoxLayout()
+        self.reconstructedSignalLayout = QHBoxLayout()
+        self.comparisonLayout = QHBoxLayout()
+        self.diffrenceGraphLayout = QVBoxLayout()
+        self.frequencyDomainLayout = QVBoxLayout()
+
+
+        # self.comparisonLayout.addLayout(self.diffrenceGraphLayout)
+        # self.comparisonLayout.addLayout(self.frequencyDomainLayout)
+
+        self.graphsLayout.addLayout(self.originalSignalLayout,35)
+        self.graphsLayout.addLayout(self.reconstructedSignalLayout,35)
+        self.graphsLayout.addLayout(self.comparisonLayout,30)
+
+        self.workspace.addLayout(self.graphsLayout,80)
+        self.workspace.addLayout(self.composerLayout,20)
+
+        self.mainLayout.addLayout(self.controlBarLayout,5)
+        self.mainLayout.addLayout(self.workspace,95)
+
+        self.controlBarLayout.addWidget(self.controlBar)
+        self.composerLayout.addWidget(self.composer)
+        self.originalSignalLayout.addWidget(self.originalSignal)
+        self.reconstructedSignalLayout.addWidget(self.reconstructedSignal)
+        self.diffrenceGraphLayout.addWidget(self.diffrenceGraph)
+        self.frequencyDomainLayout.addWidget(self.frequencyDomain)
+
+        self.splitter = QSplitter(Qt.Horizontal)
+        self.splitter.addWidget(self.diffrenceGraph)
+        self.splitter.addWidget(self.frequencyDomain)
+        self.comparisonLayout.addWidget(self.splitter)
+
+        mainWidget = QWidget()
+        mainWidget.setLayout(self.mainLayout)
+        self.setCentralWidget(mainWidget)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    main_app = MainApp()
+    main_app.show()
+    sys.exit(app.exec_())
