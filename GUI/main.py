@@ -1,5 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QAction, QVBoxLayout, QWidget, QHBoxLayout, QSplitter
+from pyqtgraph import PlotWidget
 import sys
 
 from toolbar import ToolBar
@@ -8,21 +9,29 @@ class MainApp(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.signalData = []
+
+
         self.setWindowTitle("Signi")
         self.resize(1080, 720)
         self.setWindowState(Qt.WindowMaximized)
 
+
         self.controlBar = ToolBar()
-        self.controlBar.setStyleSheet("background:red;")
+        # self.controlBar.setStyleSheet("background:red;")
         self.composer = QWidget()
         self.composer.setStyleSheet("background:blue;")
-        self.originalSignal = QWidget()
+
+        self.originalSignal = PlotWidget()
         self.originalSignal.setStyleSheet("background:black;")
-        self.reconstructedSignal = QWidget()
+
+        self.reconstructedSignal = PlotWidget()
         self.reconstructedSignal.setStyleSheet("background:purple;")
-        self.diffrenceGraph = QWidget()
+
+        self.diffrenceGraph = PlotWidget()
         self.diffrenceGraph.setStyleSheet("background:light blue;")
-        self.frequencyDomain = QWidget()
+
+        self.frequencyDomain = PlotWidget()
         self.frequencyDomain.setStyleSheet("background:dark grey;")
 
         self.mainLayout = QVBoxLayout()
