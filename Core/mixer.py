@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from Data_load import DataLoader
 from PyQt5 import QtWidgets, QtCore
 import sys
+import json
+
 
 def mixer(signal, amp, freq):
     sampling_rate = len(signal[:, 1])  # samples per second
@@ -56,6 +58,8 @@ class MixerInputPopup(QtWidgets.QDialog):
             # Call the mixer function with provided amp and freq
             mixed_signal = mixer(self.signal, amp, freq)
 
+            self.save_data({"amplitude": amp, "frequency": freq})
+            print(self.load_data())
             # For demonstration, print the mixed signal length
 
             # Plot the signals
@@ -75,6 +79,19 @@ class MixerInputPopup(QtWidgets.QDialog):
             error_dialog = QtWidgets.QMessageBox()
             error_dialog.setText("Please enter valid numeric values for amplitude and frequency.")
             error_dialog.exec_()
+
+
+    def save_data(self, data, filename="sinData.json"):
+        with open(filename, 'w') as file:
+            json.dump(data, file)
+
+    def load_data(self, filename="sinData.json"):
+        try:
+            with open(filename, 'r') as file:
+                return json.load(file)
+        except FileNotFoundError:
+            return {}
+
 
 # Main Application
 app = QtWidgets.QApplication(sys.argv)
