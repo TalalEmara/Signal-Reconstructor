@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QAction, QVBoxLayout, QWidget, QHBoxLayout, QSplitter
 import sys
 
+from toolbar import ToolBar
 
 class MainApp(QMainWindow):
     def __init__(self):
@@ -11,7 +12,7 @@ class MainApp(QMainWindow):
         self.resize(1080, 720)
         self.setWindowState(Qt.WindowMaximized)
 
-        self.controlBar = QWidget()
+        self.controlBar = ToolBar()
         self.controlBar.setStyleSheet("background:red;")
         self.composer = QWidget()
         self.composer.setStyleSheet("background:blue;")
