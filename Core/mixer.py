@@ -17,6 +17,29 @@ def mixer(signal, amp, freq):
 
     return mixed_signal
 
+def remove_elements(signal, amp, freq):
+    sampling_rate = len(signal)  # samples per second
+    duration = 1.0  # seconds
+    t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
+    sin = amp * np.sin(2 * np.pi * freq * t)
+
+    new_signal = signal - sin
+
+    return new_signal
+
+
+def save_data(data, filename="sinData.json"):
+    with open(filename, 'w') as file:
+        json.dump(data, file)
+
+def load_data(filename="sinData.json"):
+    try:
+        with open(filename, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return {}
+
+
 # Define the popup window class
 class MixerInputPopup(QtWidgets.QDialog):
     def __init__(self, signal, *args, **kwargs):
@@ -57,14 +80,22 @@ class MixerInputPopup(QtWidgets.QDialog):
 
             # Call the mixer function with provided amp and freq
             mixed_signal = mixer(self.signal, amp, freq)
+            new_signal = remove_elements(mixed_signal, amp, freq)
 
-            self.save_data({"amplitude": amp, "frequency": freq})
-            print(self.load_data())
+            save_data({"amplitude": amp, "frequency": freq})
+            print(load_data())
             # For demonstration, print the mixed signal length
 
             # Plot the signals
             plt.figure(figsize=(12, 8))
+            plt.subplot(2, 1, 1)
             plt.plot(self.signal[:, 0], mixed_signal, label='Composite Signal')
+            plt.legend()
+            plt.xlabel("Time [s]")
+            plt.ylabel("Amplitude")
+            
+            plt.subplot(2, 1, 2)
+            plt.plot(self.signal[:, 0], new_signal, label='Simple Signal')
             plt.legend()
             plt.xlabel("Time [s]")
             plt.ylabel("Amplitude")
@@ -81,17 +112,6 @@ class MixerInputPopup(QtWidgets.QDialog):
             error_dialog.exec_()
 
 
-    def save_data(self, data, filename="sinData.json"):
-        with open(filename, 'w') as file:
-            json.dump(data, file)
-
-    def load_data(self, filename="sinData.json"):
-        try:
-            with open(filename, 'r') as file:
-                return json.load(file)
-        except FileNotFoundError:
-            return {}
-
 
 # Main Application
 app = QtWidgets.QApplication(sys.argv)
@@ -104,8 +124,4 @@ popup = MixerInputPopup(ecg)
 popup.exec_()
 
 sys.exit(app.exec_())
-
-# testing
-
-# composite_signal = mixer(ecg, 1, 10)
 
