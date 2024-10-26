@@ -5,6 +5,8 @@ toolBarStyle = """
         font-weight: 500;
     
         color: #2252A0;
+        
+        
     
     }
 """
@@ -61,11 +63,5 @@ numberInputStyle = """
         border: 2px solid #2252A0;
         border-radius: 5px;  
     }
-    QDoubleSpinBox::up-button {
-    }
     
-    QDoubleSpinBox::down-button {
-        background-color: #2252A0; /* Background color of the down button */
-        border: none;               /* No border */
-}
 """
