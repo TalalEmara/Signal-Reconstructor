@@ -13,9 +13,12 @@ class MainApp(QMainWindow):
         self.signalData = []
 
 
+
+
         self.setWindowTitle("Signi")
         self.resize(1080, 720)
         self.setWindowState(Qt.WindowMaximized)
+        self.setStyleSheet("background-color: #f0f1f5;")
 
 
         self.controlBar = ToolBar()
@@ -35,11 +38,11 @@ class MainApp(QMainWindow):
         self.frequencyDomain = PlotWidget()
         self.frequencyDomain.setStyleSheet("background:dark grey;")
 
-        self.mainLayout = QVBoxLayout()
+        self.mainLayout = QHBoxLayout()
         self.controlBarLayout = QHBoxLayout()
         self.workspace = QHBoxLayout()
         self.graphsLayout = QVBoxLayout()
-        self.workspace = QHBoxLayout()
+        self.workspace = QVBoxLayout()
         self.composerLayout = QVBoxLayout()
         self.graphsLayout = QVBoxLayout()
         self.originalSignalLayout = QHBoxLayout()
@@ -56,11 +59,11 @@ class MainApp(QMainWindow):
         self.graphsLayout.addLayout(self.reconstructedSignalLayout,35)
         self.graphsLayout.addLayout(self.comparisonLayout,30)
 
-        self.workspace.addLayout(self.graphsLayout,80)
-        self.workspace.addLayout(self.composerLayout,20)
+        self.workspace.addLayout(self.controlBarLayout,5)
+        self.workspace.addLayout(self.graphsLayout,95)
 
-        self.mainLayout.addLayout(self.controlBarLayout,5)
-        self.mainLayout.addLayout(self.workspace,95)
+        self.mainLayout.addLayout(self.workspace,80)
+        self.mainLayout.addLayout(self.composerLayout,20)
 
         self.controlBarLayout.addWidget(self.controlBar)
         self.composerLayout.addWidget(self.composer)
