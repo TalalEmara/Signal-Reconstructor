@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QAction, QVBoxLayout, QWidget, QHBoxLayout, QSplitter, \
-    QPushButton, QSlider, QLineEdit
+    QPushButton, QSlider, QLineEdit, QComboBox
 
 
 class ToolBar(QWidget):
@@ -10,6 +10,8 @@ class ToolBar(QWidget):
         self.signalName = "s"
         self.nameLabel = QLabel(f"name: {self.signalName}")
         self.browseButton = QPushButton("Browse")
+        self.samplingMethodLabel = QLabel("sampling method: ")
+        self.samplingMethod = QComboBox()
         self.samplingRateLabel = QLabel("sampling rate: ")
         self.samplingRateInput = QLineEdit()
 
@@ -20,6 +22,8 @@ class ToolBar(QWidget):
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.nameLabel)
         self.layout.addWidget(self.browseButton)
+        self.layout.addWidget(self.samplingMethodLabel)
+        self.layout.addWidget(self.samplingMethod)
         self.layout.addWidget(self.samplingRateLabel)
         self.layout.addWidget(self.samplingRateInput)
         self.layout.addWidget(self.snrLabel)

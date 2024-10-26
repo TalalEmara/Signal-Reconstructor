@@ -4,6 +4,7 @@ from pyqtgraph import PlotWidget
 import sys
 
 from toolbar import ToolBar
+from Composer import Composer
 
 class MainApp(QMainWindow):
     def __init__(self):
@@ -19,8 +20,8 @@ class MainApp(QMainWindow):
 
         self.controlBar = ToolBar()
         # self.controlBar.setStyleSheet("background:red;")
-        self.composer = QWidget()
-        self.composer.setStyleSheet("background:blue;")
+        self.composer = Composer()
+        # self.composer.setStyleSheet("background:blue;")
 
         self.originalSignal = PlotWidget()
         self.originalSignal.setStyleSheet("background:black;")

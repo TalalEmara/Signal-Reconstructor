@@ -117,7 +117,7 @@ class MixerInputPopup(QtWidgets.QDialog):
 app = QtWidgets.QApplication(sys.argv)
 
 # Example signal for testing
-ecg = DataLoader('Signal-Reconstructor\signals_data\EMG_Abnormal.csv').get_data()
+ecg = DataLoader('D:\Faculty\SBE 24-25\DSP\Signal-Reconstructor\signals_data\ECG_Normal.csv').get_data()
 
 # Create and show the mixer input popup
 popup = MixerInputPopup(ecg)
