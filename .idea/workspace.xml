@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="cf936afa-7aac-4859-a24f-60ffba97b4aa" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GUI/Styles/ToolBarStyling.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI/Styles/ToolBarStyling.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GUI/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GUI/toolbar.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI/toolbar.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

@@ -1,23 +1,30 @@
-from PyQt5.QtCore import Qt
+import os
+
+import pandas as pd
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QAction, QVBoxLayout, QWidget, QHBoxLayout, QSplitter, \
-    QPushButton, QSlider, QLineEdit, QComboBox, QDoubleSpinBox
+    QPushButton, QSlider, QLineEdit, QComboBox, QDoubleSpinBox, QFileDialog
 
 from Styles.ToolBarStyling import toolBarStyle, buttonStyle, comboBoxStyle, sliderStyle, numberInputStyle
 
 
 class ToolBar(QWidget):
+    dataLoaded = pyqtSignal(pd.DataFrame)
     def __init__(self):
         super().__init__()
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet(toolBarStyle)
 
         self.signalName = "Default Signal"
+        self.signalData = []
 
         self.nameLabel = QLabel("name: ")
         self.signalNameLabel = QLabel(self.signalName)
         self.signalNameLabel.setStyleSheet("color: black; font-size: 14px;")
 
         self.browseButton = QPushButton("Browse")
+        self.browseButton.clicked.connect(self.loadSignal)
+
         self.browseButton.setStyleSheet(buttonStyle)
         self.samplingMethodLabel = QLabel("sampling method: ")
         self.samplingMethod = QComboBox()
@@ -69,3 +76,19 @@ class ToolBar(QWidget):
         self.layout.addWidget(self.snrInput,5)
 
         self.setLayout(self.layout)
+
+    def loadSignal(self):
+        # Open a file dialog to select a CSV file
+        options = QFileDialog.Options()
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv);;All Files (*)",
+                                                   options=options)
+        if file_name:
+            self.signalName = os.path.basename(file_name)
+            self.signalNameLabel.setText(self.signalName)
+            try:
+                data = pd.read_csv(file_name)
+                self.dataLoaded.emit(data)
+                print("CSV Data Loaded Successfully:")
+                print(data)  # Print or process the data as needed
+            except Exception as e:
+                print(f"Error loading CSV file: {e}")

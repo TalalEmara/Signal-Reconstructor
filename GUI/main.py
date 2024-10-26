@@ -23,6 +23,8 @@ class MainApp(QMainWindow):
 
         self.controlBar = ToolBar()
         # self.controlBar.setStyleSheet("background:red;")
+        self.controlBar.dataLoaded.connect(self.updateSignalData)
+
         self.composer = Composer()
         # self.composer.setStyleSheet("background:blue;")
 
@@ -80,6 +82,12 @@ class MainApp(QMainWindow):
         mainWidget = QWidget()
         mainWidget.setLayout(self.mainLayout)
         self.setCentralWidget(mainWidget)
+
+    def updateSignalData(self, data):
+        """Slot to handle the loaded signal data."""
+        self.signalData = data  # Store the loaded data
+        print("Signal Data Updated:")
+        print(self.signalData)  # For debugging, print the updated data
 
 
 if __name__ == "__main__":
