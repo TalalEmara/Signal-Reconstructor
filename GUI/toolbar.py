@@ -10,6 +10,7 @@ from Styles.ToolBarStyling import toolBarStyle, buttonStyle, comboBoxStyle, slid
 
 class ToolBar(QWidget):
     dataLoaded = pyqtSignal(pd.DataFrame)
+    snrChanged = pyqtSignal(float)
     def __init__(self):
         super().__init__()
         self.setAttribute(Qt.WA_StyledBackground, True)
@@ -49,15 +50,17 @@ class ToolBar(QWidget):
         self.snrInput.setAlignment(Qt.AlignCenter)
         self.snrInput.setStyleSheet(numberInputStyle)
 
-        self.snrSlider.setRange(0, 100)
+        self.snrSlider.setRange(0, 30)
 
-        self.snrInput.setRange(0, 100)
+        self.snrInput.setRange(0, 30)
+        self.snrSlider.setValue(30)
         self.snrInput.setDecimals(2)
+        self.snrInput.setValue(30)
         self.snrInput.setAlignment(Qt.AlignCenter)
 
         self.snrSlider.valueChanged.connect(lambda value: self.snrInput.setValue(value / 1.0))  # Convert to float
         self.snrInput.valueChanged.connect(lambda value: self.snrSlider.setValue(int(value)))
-
+        self.snrSlider.valueChanged.connect(self.on_snr_changed)
 
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.nameLabel, 1)
@@ -92,3 +95,6 @@ class ToolBar(QWidget):
                 print(data)  # Print or process the data as needed
             except Exception as e:
                 print(f"Error loading CSV file: {e}")
+
+    def on_snr_changed(self, value):
+        self.snrChanged.emit(value / 1.0) 
