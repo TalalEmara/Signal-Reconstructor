@@ -194,8 +194,8 @@ class MainApp(QMainWindow):
         self.frequencyDomain.clear()
         self.frequencyDomain.plot(positive_frequencies, magnitudes, pen=mkPen(color="r", width=2), name="Frequency Domain")
 
-    def add_mixed_signal(self, amplitude, frequency,signal_type):
-        mixed_signal = mixer(self.signalData, amplitude, frequency,type=signal_type)
+    def add_mixed_signal(self, amplitude, frequency):
+        mixed_signal = mixer(self.signalData, amplitude, frequency)
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal)) 
 
         self.originalSignal.clear()
