@@ -42,6 +42,7 @@ class MainApp(QMainWindow):
 
         self.composer = Composer()
         self.composer.valueAdded.connect(self.add_mixed_signal)
+        self.composer.valueUpdated.connect(self.update_table_mixed_signal)
         # self.composer.setStyleSheet("background:blue;")
 
         self.originalSignal = PlotWidget()
@@ -194,16 +195,28 @@ class MainApp(QMainWindow):
         self.frequencyDomain.clear()
         self.frequencyDomain.plot(positive_frequencies, magnitudes, pen=mkPen(color="r", width=2), name="Frequency Domain")
 
-    def add_mixed_signal(self, amplitude, frequency):
-        mixed_signal = mixer(self.signalData, amplitude, frequency)
+    def add_mixed_signal(self, amplitude, frequency,signal_type):
+        mixed_signal = mixer(self.signalData, amplitude, frequency,signal_type)
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal)) 
 
         self.originalSignal.clear()
         self.originalSignal.plot(self.signalData[:, 0], mixed_signal, pen=mkPen(color="b", width=2), name="Mixed Signal")
+        
         snr_value = self.controlBar.snrSlider.value()
         noisy_signal = add_noise(mixed_signal, snr_value)
 
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Mixed Signal")
+
+    def update_table_mixed_signal(self, row, amplitude, frequency,signal_type):
+        updated_signal = mixer(self.signalData, amplitude, frequency,signal_type)
+        self.signalData = np.column_stack((self.signalData[:, 0], updated_signal))
+
+        self.originalSignal.clear()
+        self.originalSignal.plot(self.signalData[:, 0], updated_signal, pen=mkPen(color="b", width=2), name=f"Updated Signal Row {row}")
+        
+        snr_value = self.controlBar.snrSlider.value()
+        noisy_signal = add_noise(updated_signal, snr_value)
+        self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Updated Signal")
 
 
 if __name__ == "__main__":

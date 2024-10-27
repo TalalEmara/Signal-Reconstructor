@@ -1,12 +1,13 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QDoubleSpinBox, QTableWidget, QVBoxLayout, QHBoxLayout, \
-    QPushButton, QHeaderView
+    QPushButton, QHeaderView,QTableWidgetItem
 from PyQt5.QtCore import Qt, pyqtSignal
 from Styles.ComposerStyling import composerTitleStyle, comboBoxStyle, doubleSpinBoxStyle, buttonStyle, tableStyle
 
 
 class Composer(QWidget):
     valueAdded = pyqtSignal(float, float,str)
+    valueUpdated = pyqtSignal(int, float, float, str)
     def __init__(self):
         super().__init__()
         self.composerTitle = QLabel("Mixer")
@@ -64,9 +65,29 @@ class Composer(QWidget):
         self.setLayout(self.mainLayout)
 
         self.addButton.clicked.connect(self.emit_values)
+        self.componentsTable.cellChanged.connect(self.handle_table_edit)
 
     def emit_values(self):
         amplitude = self.amplitudeInput.value()
         frequency = self.frequencyInput.value()
         signal_type = self.functionType.currentText()
         self.valueAdded.emit(amplitude, frequency,signal_type)
+        self.add_to_table(signal_type, amplitude, frequency) 
+
+    def add_to_table(self, signal_type, amplitude, frequency):
+        row = self.componentsTable.rowCount()
+        self.componentsTable.insertRow(row)
+
+        self.componentsTable.setItem(row, 0, QTableWidgetItem(signal_type))
+        self.componentsTable.setItem(row, 1, QTableWidgetItem(str(amplitude)))
+        self.componentsTable.setItem(row, 2, QTableWidgetItem(str(frequency)))
+    
+    def handle_table_edit(self, row, column):
+        try:
+            signal_type = self.componentsTable.item(row, 0).text()
+            amplitude = float(self.componentsTable.item(row, 1).text())
+            frequency = float(self.componentsTable.item(row, 2).text())
+            self.valueUpdated.emit(row, amplitude, frequency, signal_type)
+        except ValueError:
+            
+            pass
