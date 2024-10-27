@@ -8,6 +8,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from toolbar import ToolBar
 from Composer import Composer
 from Core.Data_load import DataLoader
+from Core.mixer import mixer, remove_elements
+from Core.noise import add_noise 
 
 class MainApp(QMainWindow):
     def __init__(self,file_path):
@@ -15,12 +17,13 @@ class MainApp(QMainWindow):
 
         # self.signalData = self.generate_default_data()
         # self.reconstructedSignalData = self.generate_default_data()
-
+        
         self.data_loader = DataLoader(file_path)
-        self.signalData = self.data_loader.get_data()  
+        self.signalData = self.data_loader.get_data() 
+        self.mixedSignalData = None  
         self.reconstructedSignalData = self.signalData
 
-
+        
 
         self.setWindowTitle("Signal")
         self.resize(1080, 720)
@@ -35,6 +38,8 @@ class MainApp(QMainWindow):
         self.controlBar.snrChanged.connect(self.updateNoise)
 
         self.composer = Composer()
+        self.composer.valueAdded.connect(self.add_mixed_signal)
+        
         # self.composer.setStyleSheet("background:blue;")
 
         self.originalSignal = PlotWidget()
@@ -108,27 +113,22 @@ class MainApp(QMainWindow):
         if x_min < 0:
             plot_widget.setXRange(0, x_max, padding=0)
     
-    def add_noise(self, data, snrdb):
-        signal_power = np.sum(data ** 2)
-        Gaussian_noise = np.random.normal(0, 1, len(data))
-        noise_power = np.sum(Gaussian_noise ** 2)
-        snr = 10 ** (snrdb * 0.1)
-        alpha = np.sqrt(signal_power / (snr * noise_power))
-        noisy_signal = data + alpha * Gaussian_noise
-        return noisy_signal
+
     
     def updateNoise(self, snr_value):
       
-        if self.signalData.shape[1] >= 2:
-            y = self.signalData[:, 1]
+        if self.mixedSignalData is not None:
+            x = self.mixedSignalData[:, 0]
+            y = self.mixedSignalData[:, 1]
+        else:
             x = self.signalData[:, 0]
-            noisy_signal = self.add_noise(y, snr_value)
+            y = self.signalData[:, 1]
 
-           
-            self.originalSignal.clear()
-            self.originalSignal.plot(x, self.signalData[:, 1], pen=mkPen(color="b", width=2), name="Original Signal")
-            self.originalSignal.plot(x, noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal")
-            
+        noisy_signal = add_noise(y, snr_value)
+        
+        self.originalSignal.clear()
+        self.originalSignal.plot(x, y, pen=mkPen(color="b", width=2), name="Original or Mixed Signal")
+        self.originalSignal.plot(x, noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal")
 
     
     def generate_default_data(self): #testing
@@ -148,8 +148,7 @@ class MainApp(QMainWindow):
             self.originalSignal.clear()
             self.originalSignal.plot(x, y, pen=mkPen(color="b", width=2), name="Original Signal")
                 
-            noisy_signal = self.add_noise(y, snr_value)
-            
+            noisy_signal = add_noise(y, snr_value)
             self.originalSignal.plot(x, noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal")
 
 
@@ -184,7 +183,6 @@ class MainApp(QMainWindow):
         fft_values = np.fft.fft(amplitude)
         fft_frequencies = np.fft.fftfreq(N, d=time_step)
 
-        # Only use the positive half of the FFT results
         positive_frequencies = fft_frequencies[:N // 2]
         magnitudes = np.abs(fft_values[:N // 2])
 
@@ -192,6 +190,16 @@ class MainApp(QMainWindow):
         self.frequencyDomain.clear()
         self.frequencyDomain.plot(positive_frequencies, magnitudes, pen=mkPen(color="r", width=2), name="Frequency Domain")
 
+    def add_mixed_signal(self, amplitude, frequency):
+        mixed_signal = mixer(self.signalData, amplitude, frequency)
+        self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal))  # Update signalData to the mixed signal
+
+        self.originalSignal.clear()
+        self.originalSignal.plot(self.signalData[:, 0], mixed_signal, pen=mkPen(color="b", width=2), name="Mixed Signal")
+        snr_value = self.controlBar.snrSlider.value()
+        # noisy_signal = add_noise(mixed_signal, snr_value)
+
+        # self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Mixed Signal")
 
 if __name__ == "__main__":
     csv_file_path = 'signals_data/ECG_Normal.csv'

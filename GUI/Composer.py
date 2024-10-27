@@ -1,9 +1,10 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QDoubleSpinBox, QTableWidget, QVBoxLayout, QHBoxLayout, \
     QPushButton, QHeaderView
-
+from PyQt5.QtCore import Qt, pyqtSignal
 
 class Composer(QWidget):
+    valueAdded = pyqtSignal(float, float)
     def __init__(self):
         super().__init__()
         self.composerTitle = QLabel("Mixer")
@@ -46,3 +47,9 @@ class Composer(QWidget):
 
         self.setLayout(self.mainLayout)
 
+        self.addButton.clicked.connect(self.emit_values)
+
+    def emit_values(self):
+        amplitude = self.amplitudeInput.value()
+        frequency = self.frequencyInput.value()
+        self.valueAdded.emit(amplitude, frequency)

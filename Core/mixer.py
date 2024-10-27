@@ -1,8 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from Data_load import DataLoader
-from PyQt5 import QtWidgets, QtCore
+import os
 import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from Core.Data_load import DataLoader
+from PyQt5 import QtWidgets, QtCore
 import json
 
 
@@ -40,88 +42,88 @@ def load_data(filename="sinData.json"):
         return {}
 
 
-# Define the popup window class
-class MixerInputPopup(QtWidgets.QDialog):
-    def __init__(self, signal, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.signal = signal  # The signal data passed to the popup
+# # Define the popup window class
+# class MixerInputPopup(QtWidgets.QDialog):
+#     def __init__(self, signal, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.signal = signal  # The signal data passed to the popup
 
-        # Set up the window
-        self.setWindowTitle("Mixer Input")
-        self.setFixedSize(300, 150)
+#         # Set up the window
+#         self.setWindowTitle("Mixer Input")
+#         self.setFixedSize(300, 150)
 
-        # Create layout
-        layout = QtWidgets.QVBoxLayout()
+#         # Create layout
+#         layout = QtWidgets.QVBoxLayout()
 
-        # Amplitude input
-        self.amp_label = QtWidgets.QLabel("Amplitude:")
-        self.amp_input = QtWidgets.QLineEdit()
-        layout.addWidget(self.amp_label)
-        layout.addWidget(self.amp_input)
+#         # Amplitude input
+#         self.amp_label = QtWidgets.QLabel("Amplitude:")
+#         self.amp_input = QtWidgets.QLineEdit()
+#         layout.addWidget(self.amp_label)
+#         layout.addWidget(self.amp_input)
 
-        # Frequency input
-        self.freq_label = QtWidgets.QLabel("Frequency:")
-        self.freq_input = QtWidgets.QLineEdit()
-        layout.addWidget(self.freq_label)
-        layout.addWidget(self.freq_input)
+#         # Frequency input
+#         self.freq_label = QtWidgets.QLabel("Frequency:")
+#         self.freq_input = QtWidgets.QLineEdit()
+#         layout.addWidget(self.freq_label)
+#         layout.addWidget(self.freq_input)
 
-        # Submit button
-        self.submit_button = QtWidgets.QPushButton("Mix Signal")
-        self.submit_button.clicked.connect(self.submit_values)
-        layout.addWidget(self.submit_button)
+#         # Submit button
+#         self.submit_button = QtWidgets.QPushButton("Mix Signal")
+#         self.submit_button.clicked.connect(self.submit_values)
+#         layout.addWidget(self.submit_button)
 
-        self.setLayout(layout)
+#         self.setLayout(layout)
 
-    def submit_values(self):
-        try:
-            # Retrieve amplitude and frequency from input fields
-            amp = float(self.amp_input.text())
-            freq = float(self.freq_input.text())
+#     def submit_values(self):
+#         try:
+#             # Retrieve amplitude and frequency from input fields
+#             amp = float(self.amp_input.text())
+#             freq = float(self.freq_input.text())
 
-            # Call the mixer function with provided amp and freq
-            mixed_signal = mixer(self.signal, amp, freq)
-            new_signal = remove_elements(mixed_signal, amp, freq)
+#             # Call the mixer function with provided amp and freq
+#             mixed_signal = mixer(self.signal, amp, freq)
+#             new_signal = remove_elements(mixed_signal, amp, freq)
 
-            save_data({"amplitude": amp, "frequency": freq})
-            print(load_data())
-            # For demonstration, print the mixed signal length
+#             save_data({"amplitude": amp, "frequency": freq})
+#             print(load_data())
+#             # For demonstration, print the mixed signal length
 
-            # Plot the signals
-            plt.figure(figsize=(12, 8))
-            plt.subplot(2, 1, 1)
-            plt.plot(self.signal[:, 0], mixed_signal, label='Composite Signal')
-            plt.legend()
-            plt.xlabel("Time [s]")
-            plt.ylabel("Amplitude")
+#             # Plot the signals
+#             plt.figure(figsize=(12, 8))
+#             plt.subplot(2, 1, 1)
+#             plt.plot(self.signal[:, 0], mixed_signal, label='Composite Signal')
+#             plt.legend()
+#             plt.xlabel("Time [s]")
+#             plt.ylabel("Amplitude")
             
-            plt.subplot(2, 1, 2)
-            plt.plot(self.signal[:, 0], new_signal, label='Simple Signal')
-            plt.legend()
-            plt.xlabel("Time [s]")
-            plt.ylabel("Amplitude")
+#             plt.subplot(2, 1, 2)
+#             plt.plot(self.signal[:, 0], new_signal, label='Simple Signal')
+#             plt.legend()
+#             plt.xlabel("Time [s]")
+#             plt.ylabel("Amplitude")
 
-            plt.tight_layout()
-            plt.show()
-            # Close the dialog after submission
-            self.accept()
+#             plt.tight_layout()
+#             plt.show()
+#             # Close the dialog after submission
+#             self.accept()
 
-        except ValueError:
-            # Show error message if conversion fails
-            error_dialog = QtWidgets.QMessageBox()
-            error_dialog.setText("Please enter valid numeric values for amplitude and frequency.")
-            error_dialog.exec_()
+#         except ValueError:
+#             # Show error message if conversion fails
+#             error_dialog = QtWidgets.QMessageBox()
+#             error_dialog.setText("Please enter valid numeric values for amplitude and frequency.")
+#             error_dialog.exec_()
 
 
 
-# Main Application
-app = QtWidgets.QApplication(sys.argv)
+# # Main Application
+# app = QtWidgets.QApplication(sys.argv)
 
-# Example signal for testing
-ecg = DataLoader('signals_data/ECG_Normal.csv').get_data()
+# # Example signal for testing
+# ecg = DataLoader('signals_data/ECG_Normal.csv').get_data()
 
-# Create and show the mixer input popup
-popup = MixerInputPopup(ecg)
-popup.exec_()
+# # Create and show the mixer input popup
+# popup = MixerInputPopup(ecg)
+# popup.exec_()
 
-sys.exit(app.exec_())
+# sys.exit(app.exec_())
 
