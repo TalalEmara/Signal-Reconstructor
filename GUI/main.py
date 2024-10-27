@@ -37,6 +37,9 @@ class MainApp(QMainWindow):
         self.controlBar.dataLoaded.connect(lambda data: self.updateSignalData(data.to_numpy()))
         self.controlBar.snrChanged.connect(self.updateNoise)
 
+        self.current_signal_index = None  
+        self.controlBar.deleteSignal.connect(self.delete_signal)
+
         self.composer = Composer()
         self.composer.valueAdded.connect(self.add_mixed_signal)
         
@@ -70,6 +73,7 @@ class MainApp(QMainWindow):
         self.comparisonLayout = QHBoxLayout()
         self.diffrenceGraphLayout = QVBoxLayout()
         self.frequencyDomainLayout = QVBoxLayout()
+
 
 
         # self.comparisonLayout.addLayout(self.diffrenceGraphLayout)
@@ -197,9 +201,20 @@ class MainApp(QMainWindow):
         self.originalSignal.clear()
         self.originalSignal.plot(self.signalData[:, 0], mixed_signal, pen=mkPen(color="b", width=2), name="Mixed Signal")
         snr_value = self.controlBar.snrSlider.value()
-        # noisy_signal = add_noise(mixed_signal, snr_value)
+        noisy_signal = add_noise(mixed_signal, snr_value)
 
-        # self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Mixed Signal")
+        self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Mixed Signal")
+
+    def delete_signal(self):
+        if self.current_signal_index is not None:
+            # Logic to delete the selected signal
+            # This will depend on how your signals are stored and managed
+            # For example, if signals are in an array, remove the selected index
+
+            self.signalData = np.delete(self.signalData, self.current_signal_index, axis=0)  # Delete the signal
+            self.updateSignalData(self.signalData)  # Update the plots after deletion
+            self.current_signal_index = None  # Reset the index
+
 
 if __name__ == "__main__":
     csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Normal.csv'

@@ -6,11 +6,12 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QAction, QVBoxLay
     QPushButton, QSlider, QLineEdit, QComboBox, QDoubleSpinBox, QFileDialog
 
 from Styles.ToolBarStyling import toolBarStyle, buttonStyle, comboBoxStyle, sliderStyle, numberInputStyle
-
+from PyQt5.QtGui import QIcon 
 
 class ToolBar(QWidget):
     dataLoaded = pyqtSignal(pd.DataFrame)
     snrChanged = pyqtSignal(float)
+    deleteSignal = pyqtSignal() 
     def __init__(self):
         super().__init__()
         self.setAttribute(Qt.WA_StyledBackground, True)
@@ -25,6 +26,12 @@ class ToolBar(QWidget):
 
         self.browseButton = QPushButton("Browse")
         self.browseButton.clicked.connect(self.loadSignal)
+
+        self.deleteButton = QPushButton()  
+        self.deleteButton.setIcon(QIcon('delete.png'))  
+        self.deleteButton.setStyleSheet(buttonStyle)
+        self.deleteButton.clicked.connect(self.on_delete_clicked) 
+
 
         self.browseButton.setStyleSheet(buttonStyle)
         self.samplingMethodLabel = QLabel("sampling method: ")
@@ -67,6 +74,7 @@ class ToolBar(QWidget):
         self.layout.addWidget(self.signalNameLabel, 1)
         self.layout.addStretch(1)
         self.layout.addWidget(self.browseButton, 5)
+        self.layout.addWidget(self.deleteButton, 1) 
         self.layout.addStretch(2)
         self.layout.addWidget(self.samplingMethodLabel,3)
         self.layout.addWidget(self.samplingMethod,7)
@@ -98,3 +106,6 @@ class ToolBar(QWidget):
 
     def on_snr_changed(self, value):
         self.snrChanged.emit(value / 1.0) 
+
+    def on_delete_clicked(self):
+        self.deleteSignal.emit()

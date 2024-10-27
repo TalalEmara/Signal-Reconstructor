@@ -2,25 +2,37 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QDoubleSpinBox, QTableWidget, QVBoxLayout, QHBoxLayout, \
     QPushButton, QHeaderView
 from PyQt5.QtCore import Qt, pyqtSignal
+from Styles.ComposerStyling import composerTitleStyle, comboBoxStyle, doubleSpinBoxStyle, buttonStyle, tableStyle
+
 
 class Composer(QWidget):
     valueAdded = pyqtSignal(float, float)
     def __init__(self):
         super().__init__()
         self.composerTitle = QLabel("Mixer")
+        self.composerTitle.setObjectName("composerTitle")  
+        self.composerTitle.setStyleSheet(composerTitleStyle)
 
         self.functionType = QComboBox()
+        self.functionType.setStyleSheet(comboBoxStyle) 
+
         self.amplitudeLabel = QLabel("Amplitude")
         self.amplitudeInput = QDoubleSpinBox()
+        self.amplitudeInput.setStyleSheet(doubleSpinBoxStyle)
+
         self.frequencyLabel = QLabel("Frequency")
         self.frequencyInput = QDoubleSpinBox()
+        self.frequencyInput.setStyleSheet(doubleSpinBoxStyle)
+
         self.addButton = QPushButton("Add")
+        self.addButton.setStyleSheet(buttonStyle) 
 
         self.componentsTable = QTableWidget()
         self.componentsTable.setColumnCount(4)
         self.componentsTable.setHorizontalHeaderLabels(["Type", "Amplitude", "Frequency", ""])
         self.componentsTable.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
+        self.componentsTable.setStyleSheet(tableStyle)
+        
         self.header = self.componentsTable.horizontalHeader()
         self.header.setSectionResizeMode(0, QHeaderView.Stretch)
         self.header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
