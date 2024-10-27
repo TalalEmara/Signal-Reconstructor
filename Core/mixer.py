@@ -6,26 +6,46 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from Core.Data_load import DataLoader
 from PyQt5 import QtWidgets, QtCore
 import json
+from scipy.signal import square
 
 
-def mixer(signal, amp, freq):
+def mixer(signal, amp, freq, type):
     sampling_rate = len(signal[:, 1])  # samples per second
     duration = 1.0  # seconds
     t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
-    sin = amp * np.sin(2 * np.pi * freq * t)
-    print(len(signal[:, 1]))
+    if type == 'sin':
+        signal = amp * np.sin(2 * np.pi * freq * t)
+    elif type == 'cos':
+        signal = amp * np.cos(2 * np.pi * freq * t)
+    elif type == 'square':
+        signal = amp * square(2 * np.pi * freq * t)
+    elif type == "triangular":
+        signal = amp * (2 * np.abs((t * freq) % 1 - 0.5) - 1)
+    else: 
+        return "Not a supported type"
+    
+    # print(len(signal[:, 1]))
 
-    mixed_signal = sin + signal[:, 1]
+    save_data({'amplitude': amp, 'frequency': freq, 'type': type})
+
+    mixed_signal = signal + signal[:, 1]
 
     return mixed_signal
 
-def remove_elements(signal, amp, freq):
+def remove_elements(signal, amp, freq, type):
     sampling_rate = len(signal)  # samples per second
     duration = 1.0  # seconds
     t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
-    sin = amp * np.sin(2 * np.pi * freq * t)
-
-    new_signal = signal - sin
+    if type == 'sin':
+        signal = amp * np.sin(2 * np.pi * freq * t)
+    elif type == 'cos':
+        signal = amp * np.cos(2 * np.pi * freq * t)
+    elif type == 'square':
+        signal = amp * square(2 * np.pi * freq * t)
+    elif type == "triangular":
+        signal = amp * (2 * np.abs((t * freq) % 1 - 0.5) - 1)
+    
+    new_signal = signal - signal
 
     return new_signal
 

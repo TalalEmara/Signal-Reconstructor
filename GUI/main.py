@@ -202,7 +202,7 @@ class MainApp(QMainWindow):
         # self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Mixed Signal")
 
 if __name__ == "__main__":
-    csv_file_path = 'signals_data/ECG_Normal.csv'
+    csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Normal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
