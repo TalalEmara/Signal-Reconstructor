@@ -12,22 +12,31 @@ composerTitleStyle = """
 
 comboBoxStyle = """
     QComboBox {
-        color: #EFEFEF;
-        background-color: #2252A0;
-        border: 2px solid #174082;
+        font-family: "Samsung Sans";
+        font-size: 16px;
+        color: #EFEFEF;  /* Text color for the combo box when closed */
+        background-color: #2252A0;  /* Background color for the combo box */
+        border: 1px solid #174082;
         border-radius: 5px;
-        padding: 5px;
+        padding: 2px;
     }
     QComboBox::down-arrow {
-        color: #EFEFEF;
-        width: 8px;
-        height: 8px;
+        color: #EFEFEF;  /* Color of the dropdown arrow */
+        width: 5px;
     }
     QComboBox QAbstractItemView {
-        selection-background-color: #2252A0;
-        selection-color: #FFFFFF;
+        background-color: white;  /* Background color of the dropdown list */
+        selection-background-color: #1A5EB8;  /* Background color when an item is selected */
+        selection-color: white;  /* Text color when an item is selected */
+        font-family: "Samsung Sans";
+        font-size: 16px;
+        color: #2252A0;  /* Text color for the items in the dropdown */
+    }
+    QComboBox QAbstractItemView::item {
+        padding: 4px;  /* Padding for each item */
     }
 """
+
 
 doubleSpinBoxStyle = """
     QDoubleSpinBox {

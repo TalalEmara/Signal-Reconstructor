@@ -6,7 +6,7 @@ from Styles.ComposerStyling import composerTitleStyle, comboBoxStyle, doubleSpin
 
 
 class Composer(QWidget):
-    valueAdded = pyqtSignal(float, float)
+    valueAdded = pyqtSignal(float, float,str)
     def __init__(self):
         super().__init__()
         self.composerTitle = QLabel("Mixer")
@@ -15,6 +15,10 @@ class Composer(QWidget):
 
         self.functionType = QComboBox()
         self.functionType.setStyleSheet(comboBoxStyle) 
+        self.functionType.addItem('sin')
+        self.functionType.addItem('cos')
+        self.functionType.addItem('square')
+        self.functionType.addItem('triangular')
 
         self.amplitudeLabel = QLabel("Amplitude")
         self.amplitudeInput = QDoubleSpinBox()
@@ -64,4 +68,5 @@ class Composer(QWidget):
     def emit_values(self):
         amplitude = self.amplitudeInput.value()
         frequency = self.frequencyInput.value()
-        self.valueAdded.emit(amplitude, frequency)
+        signal_type = self.functionType.currentText()
+        self.valueAdded.emit(amplitude, frequency,signal_type)

@@ -38,11 +38,10 @@ class MainApp(QMainWindow):
         self.controlBar.snrChanged.connect(self.updateNoise)
 
         self.current_signal_index = None  
-        self.controlBar.deleteSignal.connect(self.delete_signal)
+      
 
         self.composer = Composer()
         self.composer.valueAdded.connect(self.add_mixed_signal)
-        
         # self.composer.setStyleSheet("background:blue;")
 
         self.originalSignal = PlotWidget()
@@ -53,13 +52,13 @@ class MainApp(QMainWindow):
         self.noisySignal = PlotWidget()
 
         self.reconstructedSignal = PlotWidget()
-        self.reconstructedSignal.setStyleSheet("background:purple;")
+        # self.reconstructedSignal.setStyleSheet("background:purple;")
 
         self.diffrenceGraph = PlotWidget()
-        self.diffrenceGraph.setStyleSheet("background:light blue;")
+        # self.diffrenceGraph.setStyleSheet("background:light blue;")
 
         self.frequencyDomain = PlotWidget()
-        self.frequencyDomain.setStyleSheet("background:dark grey;")
+        # self.frequencyDomain.setStyleSheet("background:dark grey;")
 
         self.mainLayout = QHBoxLayout()
         self.controlBarLayout = QHBoxLayout()
@@ -107,6 +106,7 @@ class MainApp(QMainWindow):
 
         self.updateSignalData(self.signalData) 
 
+        #limit x 
         self.originalSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.originalSignal))
         self.reconstructedSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.reconstructedSignal))
         self.diffrenceGraph.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.diffrenceGraph))
@@ -194,9 +194,9 @@ class MainApp(QMainWindow):
         self.frequencyDomain.clear()
         self.frequencyDomain.plot(positive_frequencies, magnitudes, pen=mkPen(color="r", width=2), name="Frequency Domain")
 
-    def add_mixed_signal(self, amplitude, frequency):
-        mixed_signal = mixer(self.signalData, amplitude, frequency)
-        self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal))  # Update signalData to the mixed signal
+    def add_mixed_signal(self, amplitude, frequency,signal_type):
+        mixed_signal = mixer(self.signalData, amplitude, frequency,type=signal_type)
+        self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal)) 
 
         self.originalSignal.clear()
         self.originalSignal.plot(self.signalData[:, 0], mixed_signal, pen=mkPen(color="b", width=2), name="Mixed Signal")
@@ -205,20 +205,11 @@ class MainApp(QMainWindow):
 
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Mixed Signal")
 
-    def delete_signal(self):
-        if self.current_signal_index is not None:
-            # Logic to delete the selected signal
-            # This will depend on how your signals are stored and managed
-            # For example, if signals are in an array, remove the selected index
-
-            self.signalData = np.delete(self.signalData, self.current_signal_index, axis=0)  # Delete the signal
-            self.updateSignalData(self.signalData)  # Update the plots after deletion
-            self.current_signal_index = None  # Reset the index
-
 
 if __name__ == "__main__":
-    csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Normal.csv'
+    csv_file_path = 'signals_data/ECG_Normal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
     sys.exit(app.exec_())
+

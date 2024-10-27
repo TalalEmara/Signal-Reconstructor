@@ -27,12 +27,6 @@ class ToolBar(QWidget):
         self.browseButton = QPushButton("Browse")
         self.browseButton.clicked.connect(self.loadSignal)
 
-        self.deleteButton = QPushButton()  
-        self.deleteButton.setIcon(QIcon('delete.png'))  
-        self.deleteButton.setStyleSheet(buttonStyle)
-        self.deleteButton.clicked.connect(self.on_delete_clicked) 
-
-
         self.browseButton.setStyleSheet(buttonStyle)
         self.samplingMethodLabel = QLabel("sampling method: ")
         self.samplingMethod = QComboBox()
@@ -74,7 +68,7 @@ class ToolBar(QWidget):
         self.layout.addWidget(self.signalNameLabel, 1)
         self.layout.addStretch(1)
         self.layout.addWidget(self.browseButton, 5)
-        self.layout.addWidget(self.deleteButton, 1) 
+   
         self.layout.addStretch(2)
         self.layout.addWidget(self.samplingMethodLabel,3)
         self.layout.addWidget(self.samplingMethod,7)
