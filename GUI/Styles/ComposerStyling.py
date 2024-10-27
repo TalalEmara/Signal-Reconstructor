@@ -74,12 +74,59 @@ tableStyle = """
         gridline-color: #2252A0;
         selection-background-color: #1A5EB8;
         selection-color: #FFFFFF;
+        font-family: "Samsung Sans";
+        font-size: 15px;
+        alternate-background-color: #F2F7FF;  
     }
+    QTableWidget::item {
+        padding: 5px;
+    }
+    QTableWidget::item:selected {
+        background-color: #1A5EB8; 
+        color: #FFFFFF;
+    }
+    
     QHeaderView::section {
         background-color: #2252A0;
         color: #EFEFEF;
-        padding: 4px;
-        font-weight: 500;
+        padding: 6px;
+        font-weight: 600;
         border: 1px solid #174082;
+    }
+     QTableWidget::item:focus {
+        background-color: #D6E4FF;  
+        color: #000000;             
+        
+    }
+    
+    QTableWidget QTableCornerButton::section {
+        background-color: #2252A0;
+        border: 1px solid #174082;
+    }
+    
+
+    QTableWidget::item:hover {
+        background-color: #E3EEFF; 
+    }
+    
+    /* Scrollbar styling */
+    QScrollBar:vertical {
+        border: none;
+        background: #D6D9E2;
+        width: 10px;
+        margin: 20px 0 20px 0;
+    }
+    QScrollBar::handle:vertical {
+        background: #2252A0;
+        min-height: 20px;
+        border-radius: 5px;
+    }
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+        border: none;
+        background: none;
+        height: 0px;
+    }
+    QScrollBar::handle:vertical:hover {
+        background: #1A5EB8;  
     }
 """
