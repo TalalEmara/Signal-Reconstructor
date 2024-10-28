@@ -12,7 +12,9 @@ class ToolBar(QWidget):
     dataLoaded = pyqtSignal(pd.DataFrame)
     snrChanged = pyqtSignal(float)
     snrEnabledChanged = pyqtSignal(bool)
-    deleteSignal = pyqtSignal() 
+    deleteSignal = pyqtSignal()
+
+    samplingRateChanged = pyqtSignal(float)
 
     def __init__(self):
         super().__init__()
@@ -96,6 +98,7 @@ class ToolBar(QWidget):
         self.normSamplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value * 100)))
         self.normSamplingRateInput.valueChanged.connect(lambda: self.samplingRateInput.setValue(self.signalfMax * self.normSamplingRateInput.value()))
         self.samplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value / self.signalfMax * 100)) if self.signalfMax else None)
+        self.samplingRateInput.valueChanged.connect(self.on_sampling_rate_changed)
 
         self.rowLayout = QHBoxLayout()
         self.rowLayout.addWidget(self.title, 1)
@@ -138,9 +141,12 @@ class ToolBar(QWidget):
             except Exception as e:
                 print(f"Error loading CSV file: {e}")
 
+    def on_sampling_rate_changed(self, value):
+        self.samplingRateChanged.emit(value)
+
     def on_snr_changed(self, value):
-        self.snrChanged.emit(value / 1.0) 
-    
+        self.snrChanged.emit(value / 1.0)
+
 
     def on_snr_enabled_changed(self, state):
         is_enabled = state == Qt.Checked

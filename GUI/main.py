@@ -52,13 +52,17 @@ class MainApp(QMainWindow):
 
         self.controlBar = ToolBar()
         self.controlBar.signalfMax = self.signalfMax
+
+
+
         self.snr_enabled = False
         # self.controlBar.setStyleSheet("background:red;")
         self.controlBar.dataLoaded.connect(self.updateSignalData)
         self.controlBar.dataLoaded.connect(lambda data: self.updateSignalData(data.to_numpy()))
         self.controlBar.snrEnabledChanged.connect(self.set_snr_enabled)
         self.controlBar.snrChanged.connect(self.updateNoise)
-        
+        self.controlBar.samplingRateChanged.connect(self.updateSamplingRate)
+
 
         self.current_signal_index = None  
       
@@ -167,6 +171,17 @@ class MainApp(QMainWindow):
         time = np.linspace(0, 1, 1000)
         amplitude = np.sin(2 * np.pi * 122 * time)
         return np.column_stack((time, amplitude))
+
+    def updateSamplingRate(self, samplingRate):
+        self.sampling_rate = int(samplingRate)
+        print(samplingRate)
+        print(self.sampling_rate)
+        try:
+            self.updateSignalData(self.signalData)
+        except Exception as e:
+            # Handle the exception (e.g., log it or show a message)
+            print(f"An error occurred while updating signal data: {e}")
+
 
     def updateSignalData(self, data):
         self.signalData = np.array(data)
