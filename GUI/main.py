@@ -288,16 +288,12 @@ class MainApp(QMainWindow):
         self.old_type = signal_type
 
         mixed_signal = mixer(self.signalData, amplitude, frequency,signal_type)
-        # print(self.signalData[:, 1])
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal)) 
-        # print(self.signalData[:, 1])
-
 
         # self.originalSignal.clear()
         # self.originalSignal.plot(self.signalData[:, 0], mixed_signal, pen=mkPen(color="b", width=2), name="Mixed Signal")
-        combined_signal = np.column_stack((self.signalData[:, 0], mixed_signal))
 
-        self.updateSignalData(combined_signal)
+        self.updateSignalData(self.signalData)
 
         snr_value = self.controlBar.snrSlider.value()
         noisy_signal = add_noise(mixed_signal, snr_value) if self.snr_enabled else mixed_signal
@@ -319,9 +315,7 @@ class MainApp(QMainWindow):
         self.originalSignal.clear()
         self.originalSignal.plot(self.signalData[:, 0], updated_signal, pen=mkPen(color="b", width=2), name=f"Updated Signal Row {row}")
 
-        combined_signal = np.column_stack((self.signalData[:, 0], updated_signal))
-
-        self.updateSignalData(combined_signal)
+        self.updateSignalData(self.signalData)
 
 
         snr_value = self.controlBar.snrSlider.value()
@@ -341,9 +335,7 @@ class MainApp(QMainWindow):
         # Plot the updated mixed signal
         self.originalSignal.plot(self.signalData[:, 0], old_signal, pen=mkPen(color="b", width=2), name="Updated Mixed Signal After Removal")
         
-        combined_signal = np.column_stack((self.signalData[:, 0], old_signal))
-
-        self.updateSignalData(combined_signal)
+        self.updateSignalData(self.signalData)
 
 
         # Get the current SNR value and add noise if enabled
