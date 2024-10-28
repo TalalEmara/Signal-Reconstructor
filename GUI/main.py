@@ -212,6 +212,8 @@ class MainApp(QMainWindow):
         y = self.reconstructedSignalData
         # print(np.dim(y))
 
+        self.originalSignal.plot(self.sampledTime, self.sampledSignal,symbol='o', symbolSize=8, symbolBrush='b')
+
         self.reconstructedSignal.clear()
         self.reconstructedSignal.plot(x, y, pen=mkPen(color="b", width=2), name="Original Signal")
 
