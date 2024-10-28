@@ -70,10 +70,10 @@ class ToolBar(QWidget):
         self.samplingMethodLabel = QLabel("reconstruction method: ")
         self.samplingMethod = QComboBox()
         self.samplingMethod.setStyleSheet(comboBoxStyle)
-        self.samplingMethod.addItem("Nyquist–Shannon")
+        self.samplingMethod.addItem("Whittaker-Shannon (sinc)")
         self.samplingMethod.addItem("Linear")
-        self.samplingMethod.addItem("Cubic-spline")
-        self.samplingMethod.addItem("Zero-order")
+        self.samplingMethod.addItem("Zero-Order Hold")
+        self.samplingMethod.addItem("Cubic-Spline")
 
 
         self.samplingSlider = QSlider(Qt.Horizontal)
