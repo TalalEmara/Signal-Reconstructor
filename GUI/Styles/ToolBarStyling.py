@@ -117,7 +117,6 @@ labelOnStyle = """
             QCheckBox {
                 color: #2252A0;
                 font-weight: bold;
-                background-color: #EFEFEF; 
             }
 """
 
@@ -125,6 +124,5 @@ labelOffStyle = """
             QCheckBox {
                 color: gray;
                 font-weight: bold;
-                background-color: #FFFFFF;
             }
 """
