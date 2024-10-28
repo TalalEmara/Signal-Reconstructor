@@ -33,10 +33,9 @@ class MainApp(QMainWindow):
         self.data_loader = DataLoader(csv_file_path)  # Load data from CSV
         self.signalData = self.data_loader.get_data()
         self.signalfMax = calculate_max_frequency(self.signalData[:, 1],self.signalData[:, 0])
-        print(self.signalfMax)
+        print(f"max frequency: {self.signalfMax}")
 
-
-        self.sampling_rate = 900
+        self.sampling_rate = 2
 
         # self.reconstructedSignalData = self.generate_default_data()
 
@@ -355,7 +354,7 @@ class MainApp(QMainWindow):
 
 
 if __name__ == "__main__":
-    csv_file_path = '../signals_data/EEG_Abnormal.csv'
+    csv_file_path = '../signals_data/ECG_Abnormal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
