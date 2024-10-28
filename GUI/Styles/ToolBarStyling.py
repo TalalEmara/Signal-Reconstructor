@@ -10,6 +10,14 @@ toolBarStyle = """
     
     }
 """
+TitleStyle = """
+    QLabel {
+        font-family: "Samsung Sans";
+        font-size: 34px;
+        font-weight: bold;
+        color: #2252A0;
+    }
+"""
 buttonStyle = """
     QPushButton {
         padding: 2px 2px;
@@ -27,6 +35,28 @@ buttonStyle = """
         background-color: #174082; 
         border-color: #174082;     
     }
+"""
+buttonWhiteStyle = """
+    QPushButton {
+    padding: 4px 8px;
+    color: #2252A0;
+    background-color: #EFEFEF;
+    border: 2px solid #2252A0;
+    border-radius: 5px;  
+}
+
+    QPushButton:hover {
+    background-color: #2B6FC1; 
+    border-color: #2B6FC1;
+    color: #FFFFFF;
+}
+
+    QPushButton:pressed {
+    background-color: #1A4A87; 
+    border-color: #1A4A87;
+    color: #FFFFFF;
+}
+
 """
 
 comboBoxStyle = """
