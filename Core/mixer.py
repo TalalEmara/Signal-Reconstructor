@@ -8,31 +8,7 @@ from PyQt5 import QtWidgets, QtCore
 import json
 from scipy.signal import square
 
-
-# def mixer(signal, amp, freq, type):
-#     sampling_rate = len(signal[:, 1])  # samples per second
-#     duration = 1.0  # seconds
-#     t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
-#     if type == 'sin':
-#         signal = amp * np.sin(2 * np.pi * freq * t)
-#     elif type == 'cos':
-#         signal = amp * np.cos(2 * np.pi * freq * t)
-#     elif type == 'square':
-#         signal = amp * square(2 * np.pi * freq * t)
-#     elif type == "triangular":
-#         signal = amp * (2 * np.abs((t * freq) % 1 - 0.5) - 1)
-#     else:
-#         return "Not a supported type"
-#
-#     # print(len(signal[:, 1]))
-#
-#     # save_data({'amplitude': amp, 'frequency': freq, 'type': type})
-#
-#     mixed_signal = signal + signal[:, 1]
-#
-#     return mixed_signal
-
-def mixer(signal, amp, freq, signal_type):
+def mixer(signal, amp, freq, signal_type = 'sin'):
     sampling_rate = len(signal[:, 1])  # samples per second
     duration = 1.0  # seconds
     t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
@@ -52,35 +28,23 @@ def mixer(signal, amp, freq, signal_type):
 
     return signal[:, 1] + mixed_component
 
-def remove_elements(signal, amp, freq, type):
-    sampling_rate = len(signal)  # samples per second
+def remove_elements(signal, amp, freq, signal_type = 'sin'):
+    sampling_rate = len(signal[:, 1])  # samples per second
     duration = 1.0  # seconds
     t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
-    if type == 'sin':
-        signal = amp * np.sin(2 * np.pi * freq * t)
-    elif type == 'cos':
-        signal = amp * np.cos(2 * np.pi * freq * t)
-    elif type == 'square':
-        signal = amp * square(2 * np.pi * freq * t)
-    elif type == "triangular":
-        signal = amp * (2 * np.abs((t * freq) % 1 - 0.5) - 1)
-    
-    new_signal = signal - signal
 
-    return new_signal
+    if signal_type == 'sin':
+        mixed_component = amp * np.sin(2 * np.pi * freq * t)
+    elif signal_type == 'cos':
+        mixed_component = amp * np.cos(2 * np.pi * freq * t)
+    elif signal_type == 'square':
+        mixed_component = amp * square(2 * np.pi * freq * t)
+    elif signal_type == "triangular":
+        mixed_component = amp * (2 * np.abs((t * freq) % 1 - 0.5) - 1)
+    else:
+        raise ValueError("Unsupported signal type")
 
-
-def save_data(data, filename="sinData.json"):
-    with open(filename, 'w') as file:
-        json.dump(data, file)
-
-def load_data(filename="sinData.json"):
-    try:
-        with open(filename, 'r') as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return {}
-
+    return signal[:, 1] - mixed_component
 
 # # Define the popup window class
 # class MixerInputPopup(QtWidgets.QDialog):
@@ -115,18 +79,15 @@ def load_data(filename="sinData.json"):
 #         self.setLayout(layout)
 
 #     def submit_values(self):
-#         try:
+#         # try:
 #             # Retrieve amplitude and frequency from input fields
 #             amp = float(self.amp_input.text())
 #             freq = float(self.freq_input.text())
 
 #             # Call the mixer function with provided amp and freq
 #             mixed_signal = mixer(self.signal, amp, freq)
-#             new_signal = remove_elements(mixed_signal, amp, freq)
-
-#             save_data({"amplitude": amp, "frequency": freq})
-#             print(load_data())
-#             # For demonstration, print the mixed signal length
+#             # print(self.signal[:, 0])
+#             new_signal = remove_elements([self.signal[:, 0], mixed_signal], amp, freq)
 
 #             # Plot the signals
 #             plt.figure(figsize=(12, 8))
@@ -147,11 +108,11 @@ def load_data(filename="sinData.json"):
 #             # Close the dialog after submission
 #             self.accept()
 
-#         except ValueError:
-#             # Show error message if conversion fails
-#             error_dialog = QtWidgets.QMessageBox()
-#             error_dialog.setText("Please enter valid numeric values for amplitude and frequency.")
-#             error_dialog.exec_()
+#         # except ValueError:
+#         #     # Show error message if conversion fails
+#         #     error_dialog = QtWidgets.QMessageBox()
+#         #     error_dialog.setText("Please enter valid numeric values for amplitude and frequency.")
+#         #     error_dialog.exec_()
 
 
 
@@ -159,7 +120,7 @@ def load_data(filename="sinData.json"):
 # app = QtWidgets.QApplication(sys.argv)
 
 # # Example signal for testing
-# ecg = DataLoader('signals_data/ECG_Normal.csv').get_data()
+# ecg = DataLoader('Signal-Reconstructor/signals_data/ECG_Normal.csv').get_data()
 
 # # Create and show the mixer input popup
 # popup = MixerInputPopup(ecg)

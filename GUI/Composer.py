@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QDoubleSpinBox, QTableWidget, QVBoxLayout, QHBoxLayout, \
-    QPushButton, QHeaderView,QTableWidgetItem
+    QPushButton, QHeaderView,QTableWidgetItem, QMessageBox
 from PyQt5.QtCore import Qt, pyqtSignal
 from Styles.ComposerStyling import composerTitleStyle, comboBoxStyle, doubleSpinBoxStyle, buttonStyle, tableStyle
 
@@ -8,6 +8,7 @@ from Styles.ComposerStyling import composerTitleStyle, comboBoxStyle, doubleSpin
 class Composer(QWidget):
     valueAdded = pyqtSignal(float, float,str)
     valueUpdated = pyqtSignal(int, float, float, str)
+    valueRemoved = pyqtSignal(float, float, str)
     
     def __init__(self):
         super().__init__()
@@ -98,7 +99,18 @@ class Composer(QWidget):
         button_layout.setAlignment(Qt.AlignCenter)  # Center the button
         button_layout.setContentsMargins(0, 0, 0, 0)  # Remove spacing around the button
 
+        print(row, amplitude, frequency, signal_type)
+        delete_button.clicked.connect(lambda: self.remove_from_table(row, amplitude, frequency, signal_type))
+
         self.componentsTable.setCellWidget(row, 3, button_widget)
+
+    def remove_from_table(self, row, amplitude, frequency, signal_type):
+        if row >= 0 < self.componentsTable.rowCount():
+            self.valueRemoved.emit(amplitude, frequency, signal_type)
+            self.componentsTable.removeRow(row)
+            print(f"Row {row} removed.")
+        else:
+            print("Invalid row index.")
 
     def handle_table_edit(self, row, column):
         try:

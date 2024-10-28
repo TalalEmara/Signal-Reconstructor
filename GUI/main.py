@@ -15,6 +15,10 @@ class MainApp(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.old_amplitude = None
+        self.old_frequency = None
+        self.old_type = None
+
         self.signalData = self.generate_default_data()
         self.reconstructedSignalData = self.generate_default_data()
         
@@ -46,6 +50,7 @@ class MainApp(QMainWindow):
         self.composer = Composer()
         self.composer.valueAdded.connect(self.add_mixed_signal)
         self.composer.valueUpdated.connect(self.update_table_mixed_signal)
+        self.composer.valueRemoved.connect(self.remove_element)
         # self.composer.setStyleSheet("background:blue;")
 
         self.originalSignal = PlotWidget()
@@ -76,8 +81,6 @@ class MainApp(QMainWindow):
         self.comparisonLayout = QHBoxLayout()
         self.diffrenceGraphLayout = QVBoxLayout()
         self.frequencyDomainLayout = QVBoxLayout()
-
-
 
         # self.comparisonLayout.addLayout(self.diffrenceGraphLayout)
         # self.comparisonLayout.addLayout(self.frequencyDomainLayout)
@@ -179,15 +182,13 @@ class MainApp(QMainWindow):
         print("Signal Data Updated:")
         print(self.signalData)
 
-    
         self.diffrenceGraph.clear()
         if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.shape[1] >= 2:
             difference = self.calculate_difference(self.signalData[:, 1], self.reconstructedSignalData[:, 1])
             self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2), name="Difference")
 
         self.plot_frequency_domain(self.signalData[:, 1], noisy_signal, self.signalData[1, 0] - self.signalData[0, 0])
-        
-    
+
 
     def calculate_difference(self, signal1, signal2):
 
@@ -214,9 +215,16 @@ class MainApp(QMainWindow):
         if self.snr_enabled:
             self.frequencyDomain.plot(original_positive_frequencies, noisy_magnitudes, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal Frequency Domain")
     
-    def add_mixed_signal(self, amplitude, frequency,signal_type):
+    def add_mixed_signal(self, amplitude, frequency, signal_type):
+        self.old_amplitude = amplitude
+        self.old_frequency = frequency
+        self.old_type = signal_type
+
         mixed_signal = mixer(self.signalData, amplitude, frequency,signal_type)
+        # print(self.signalData[:, 1])
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal)) 
+        # print(self.signalData[:, 1])
+
 
         # self.originalSignal.clear()
         # self.originalSignal.plot(self.signalData[:, 0], mixed_signal, pen=mkPen(color="b", width=2), name="Mixed Signal")
@@ -232,7 +240,13 @@ class MainApp(QMainWindow):
         self.plot_frequency_domain(mixed_signal, noisy_signal, time_step)
 
     def update_table_mixed_signal(self, row, amplitude, frequency,signal_type):
-        updated_signal = mixer(self.signalData, amplitude, frequency,signal_type)
+        old_signal = remove_elements(self.signalData, self.old_amplitude, self.old_frequency, self.old_type)
+        updated_signal = mixer(np.column_stack((self.signalData[:, 0], old_signal)), amplitude, frequency, signal_type)
+        
+        self.old_amplitude = amplitude
+        self.old_frequency = frequency
+        self.old_type = signal_type
+
         self.signalData = np.column_stack((self.signalData[:, 0], updated_signal))
 
         self.originalSignal.clear()
@@ -241,6 +255,30 @@ class MainApp(QMainWindow):
         snr_value = self.controlBar.snrSlider.value()
         noisy_signal = add_noise(updated_signal, snr_value) if self.snr_enabled else updated_signal
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Updated Signal")
+
+    def remove_element(self, amplitude, frequency, signal_type):
+        # Remove the specified elements from the signal data
+        old_signal = remove_elements(self.signalData, amplitude, frequency, signal_type)
+        
+        # Update the signalData with the modified signal
+        self.signalData = np.column_stack((self.signalData[:, 0], old_signal))
+
+        # Clear the previous plot
+        self.originalSignal.clear()
+        
+        # Plot the updated mixed signal
+        self.originalSignal.plot(self.signalData[:, 0], old_signal, pen=mkPen(color="b", width=2), name="Updated Mixed Signal After Removal")
+        
+        # Get the current SNR value and add noise if enabled
+        snr_value = self.controlBar.snrSlider.value()
+        noisy_signal = add_noise(old_signal, snr_value) if self.snr_enabled else old_signal
+        
+        # Plot the noisy version of the updated signal
+        self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Updated Signal After Removal")
+        
+        # Update frequency domain plot
+        time_step = self.signalData[1, 0] - self.signalData[0, 0]
+        self.plot_frequency_domain(old_signal, noisy_signal, time_step)
 
 
 if __name__ == "__main__":
