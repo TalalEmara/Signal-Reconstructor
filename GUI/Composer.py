@@ -120,13 +120,44 @@ class Composer(QWidget):
         self.valueRemoved.emit(amplitude, frequency, signal_type)
         self.componentsTable.removeRow(row)
         print(f"Row {row} removed with amplitude={amplitude}, frequency={frequency}, signal_type={signal_type}")            
-        
+
     def handle_table_edit(self, row, column):
-        try:
-            signal_type = self.componentsTable.item(row, 0).text()
+        signal_type = self.componentsTable.item(row, 0).text()
+
+        if self.componentsTable.item(row, 1):
             amplitude = float(self.componentsTable.item(row, 1).text())
+        else:
+            amplitude = amplitude
+
+        if self.componentsTable.item(row, 2):
             frequency = float(self.componentsTable.item(row, 2).text())
-            self.valueUpdated.emit(row, amplitude, frequency, signal_type)
-        except ValueError:
+        else:
+            frequency = frequency
+                
+        self.valueUpdated.emit(row, amplitude, frequency, signal_type)
+
+        self.update_delete_button(row, amplitude, frequency, signal_type)
+
+    def update_delete_button(self, row, amplitude, frequency, signal_type):
+        # Access the delete button in the specified row
+        button_widget = self.componentsTable.cellWidget(row, 3)
+        if button_widget:
+            delete_button = button_widget.findChild(QPushButton)  # Get the delete button
+            if delete_button:
+                # Update the connection to pass the new values
+                delete_button.clicked.disconnect()  # Disconnect previous connections
+                delete_button.clicked.connect(lambda _: self.remove_row_by_button(
+                    delete_button, amplitude=amplitude, frequency=frequency, signal_type=signal_type
+                ))
+
+
+         
+    # def handle_table_edit(self, row, column):
+    #     try:
+    #         signal_type = self.componentsTable.item(row, 0).text()
+    #         amplitude = float(self.componentsTable.item(row, 1).text())
+    #         frequency = float(self.componentsTable.item(row, 2).text())
+    #         self.valueUpdated.emit(row, amplitude, frequency, signal_type)
+    #     except ValueError:
             
-            pass
+    #         pass
