@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QDoubleSpinBox, QTableWidget, QVBoxLayout, QHBoxLayout, \
-    QPushButton, QHeaderView,QTableWidgetItem
+    QPushButton, QHeaderView,QTableWidgetItem, QMessageBox
 from PyQt5.QtCore import Qt, pyqtSignal
 from Styles.ComposerStyling import composerTitleStyle, comboBoxStyle, doubleSpinBoxStyle, buttonStyle, tableStyle
 
@@ -8,6 +8,7 @@ from Styles.ComposerStyling import composerTitleStyle, comboBoxStyle, doubleSpin
 class Composer(QWidget):
     valueAdded = pyqtSignal(float, float,str)
     valueUpdated = pyqtSignal(int, float, float, str)
+    valueRemoved = pyqtSignal(float, float, str)
     
     def __init__(self):
         super().__init__()
@@ -98,14 +99,65 @@ class Composer(QWidget):
         button_layout.setAlignment(Qt.AlignCenter)  # Center the button
         button_layout.setContentsMargins(0, 0, 0, 0)  # Remove spacing around the button
 
+        print(row, amplitude, frequency, signal_type)
+
+        delete_button.clicked.connect(lambda _, btn=delete_button: self.remove_row_by_button(
+            btn, amplitude=amplitude, frequency=frequency, signal_type=signal_type
+        ))
+
         self.componentsTable.setCellWidget(row, 3, button_widget)
 
+    def remove_row_by_button(self, button, amplitude, frequency, signal_type):
+        # Get the row of the button clicked
+        index = self.componentsTable.indexAt(button.parentWidget().pos())
+        row = index.row()
+
+        if row != -1:  # Ensure it's a valid row
+            self.remove_from_table(row, amplitude, frequency, signal_type)
+
+    def remove_from_table(self, row, amplitude, frequency, signal_type):
+        # Additional code to handle removal logic here
+        self.valueRemoved.emit(amplitude, frequency, signal_type)
+        self.componentsTable.removeRow(row)
+        print(f"Row {row} removed with amplitude={amplitude}, frequency={frequency}, signal_type={signal_type}")            
+
     def handle_table_edit(self, row, column):
-        try:
-            signal_type = self.componentsTable.item(row, 0).text()
+        signal_type = self.componentsTable.item(row, 0).text()
+
+        if self.componentsTable.item(row, 1):
             amplitude = float(self.componentsTable.item(row, 1).text())
+        else:
+            amplitude = amplitude
+
+        if self.componentsTable.item(row, 2):
             frequency = float(self.componentsTable.item(row, 2).text())
-            self.valueUpdated.emit(row, amplitude, frequency, signal_type)
-        except ValueError:
+        else:
+            frequency = frequency
+                
+        self.valueUpdated.emit(row, amplitude, frequency, signal_type)
+
+        self.update_delete_button(row, amplitude, frequency, signal_type)
+
+    def update_delete_button(self, row, amplitude, frequency, signal_type):
+        # Access the delete button in the specified row
+        button_widget = self.componentsTable.cellWidget(row, 3)
+        if button_widget:
+            delete_button = button_widget.findChild(QPushButton)  # Get the delete button
+            if delete_button:
+                # Update the connection to pass the new values
+                delete_button.clicked.disconnect()  # Disconnect previous connections
+                delete_button.clicked.connect(lambda _: self.remove_row_by_button(
+                    delete_button, amplitude=amplitude, frequency=frequency, signal_type=signal_type
+                ))
+
+
+         
+    # def handle_table_edit(self, row, column):
+    #     try:
+    #         signal_type = self.componentsTable.item(row, 0).text()
+    #         amplitude = float(self.componentsTable.item(row, 1).text())
+    #         frequency = float(self.componentsTable.item(row, 2).text())
+    #         self.valueUpdated.emit(row, amplitude, frequency, signal_type)
+    #     except ValueError:
             
-            pass
+    #         pass
