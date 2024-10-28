@@ -2,11 +2,12 @@ import os
 
 import pandas as pd
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QAction, QVBoxLayout, QWidget, QHBoxLayout, QSplitter, \
-    QPushButton, QSlider, QLineEdit, QComboBox, QDoubleSpinBox, QFileDialog
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QSlider, QComboBox, QDoubleSpinBox, \
+    QFileDialog, QCheckBox
 
-from Styles.ToolBarStyling import toolBarStyle, buttonStyle, comboBoxStyle, sliderStyle, numberInputStyle
-from PyQt5.QtGui import QIcon 
+from Styles.ToolBarStyling import toolBarStyle, buttonStyle, buttonWhiteStyle, comboBoxStyle, sliderStyle, TitleStyle, \
+    numberInputStyle
+
 
 class ToolBar(QWidget):
     dataLoaded = pyqtSignal(pd.DataFrame)
@@ -19,31 +20,25 @@ class ToolBar(QWidget):
 
         self.signalName = "Default Signal"
         self.signalData = []
+        self.signalfMax = 100
 
+        self.title = QLabel("ReSigni | ")
+        self.title.setStyleSheet(TitleStyle)
         self.nameLabel = QLabel("name: ")
         self.signalNameLabel = QLabel(self.signalName)
         self.signalNameLabel.setStyleSheet("color: black; font-size: 14px;")
 
         self.browseButton = QPushButton("Browse")
         self.browseButton.clicked.connect(self.loadSignal)
-
         self.browseButton.setStyleSheet(buttonStyle)
-        self.samplingMethodLabel = QLabel("sampling method: ")
-        self.samplingMethod = QComboBox()
-        self.samplingMethod.setStyleSheet(comboBoxStyle)
-        self.samplingMethod.addItem("Nyquist–Shannon")
-        self.samplingMethod.addItem("second Method")
-        self.samplingMethod.addItem("Third Method")
 
-        self.samplingRateLabel = QLabel("sampling rate: ")
-        self.samplingRateInput = QDoubleSpinBox()
-        self.samplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
-        self.samplingRateInput.setAlignment(Qt.AlignCenter)
-        self.samplingRateInput.setStyleSheet(numberInputStyle)
-        self.samplingRateInput.setSuffix("Hz")
+        self.clearButton = QPushButton("clear")
+        self.clearButton.setStyleSheet(buttonWhiteStyle)
 
 
-        self.snrLabel = QLabel("SNR: ")
+
+
+        self.snrEnable = QCheckBox("SNR: ")
         self.snrSlider = QSlider(Qt.Horizontal)
         self.snrSlider.setStyleSheet(sliderStyle)
         self.snrInput = QDoubleSpinBox()
@@ -63,23 +58,62 @@ class ToolBar(QWidget):
         self.snrInput.valueChanged.connect(lambda value: self.snrSlider.setValue(int(value)))
         self.snrSlider.valueChanged.connect(self.on_snr_changed)
 
-        self.layout = QHBoxLayout()
-        self.layout.addWidget(self.nameLabel, 1)
-        self.layout.addWidget(self.signalNameLabel, 1)
-        self.layout.addStretch(1)
-        self.layout.addWidget(self.browseButton, 5)
-   
-        self.layout.addStretch(2)
-        self.layout.addWidget(self.samplingMethodLabel,3)
-        self.layout.addWidget(self.samplingMethod,7)
-        self.layout.addStretch(2)
-        self.layout.addWidget(self.samplingRateLabel,5)
-        self.layout.addWidget(self.samplingRateInput,5)
-        self.layout.addStretch(2)
-        self.layout.addWidget(self.snrLabel,2)
-        self.layout.addWidget(self.snrSlider,8)
-        self.layout.addWidget(self.snrInput,5)
+        self.samplingMethodLabel = QLabel("reconstruction method: ")
+        self.samplingMethod = QComboBox()
+        self.samplingMethod.setStyleSheet(comboBoxStyle)
+        self.samplingMethod.addItem("Nyquist–Shannon")
+        self.samplingMethod.addItem("second Method")
+        self.samplingMethod.addItem("Third Method")
 
+
+        self.samplingSlider = QSlider(Qt.Horizontal)
+        self.samplingSlider.setRange(0, 400)
+        self.samplingSlider.setSingleStep(1)
+        self.samplingSlider.setStyleSheet(sliderStyle)
+
+        self.samplingRateLabel = QLabel("sampling rate: ")
+        self.samplingRateInput = QDoubleSpinBox()
+        self.samplingRateInput.setRange(0, float('inf'))
+        self.samplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        self.samplingRateInput.setAlignment(Qt.AlignRight)
+        self.samplingRateInput.setStyleSheet(numberInputStyle)
+        self.samplingRateInput.setSuffix("Hz")
+
+        self.normSamplingRateInput = QDoubleSpinBox()
+        self.normSamplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        self.normSamplingRateInput.setAlignment(Qt.AlignCenter)
+        self.normSamplingRateInput.setStyleSheet(numberInputStyle)
+        self.normSamplingRateInput.setSuffix(" fmax")
+        self.normSamplingRateInput.setRange(0,4)
+
+        self.samplingSlider.valueChanged.connect(lambda value: self.normSamplingRateInput.setValue(value / 100.0))
+        self.normSamplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value * 100)))
+        self.normSamplingRateInput.valueChanged.connect(lambda: self.samplingRateInput.setValue(self.signalfMax * self.normSamplingRateInput.value()))
+        self.samplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value / self.signalfMax * 100)) if self.signalfMax else None)
+
+        self.rowLayout = QHBoxLayout()
+        self.rowLayout.addWidget(self.title, 1)
+        self.rowLayout.addWidget(self.nameLabel, 1)
+        self.rowLayout.addWidget(self.signalNameLabel, 1)
+        self.rowLayout.addWidget(self.browseButton, 5)
+        self.rowLayout.addWidget(self.clearButton, 3)
+        self.rowLayout.addStretch(1)
+        self.rowLayout.addWidget(self.samplingMethodLabel,2)
+        self.rowLayout.addWidget(self.samplingMethod,10)
+        self.rowLayout.addStretch(1)
+        self.rowLayout.addWidget(self.samplingRateLabel,2)
+        self.rowLayout.addWidget(self.samplingSlider,7)
+        self.rowLayout.addWidget(self.normSamplingRateInput,5)
+        self.rowLayout.addWidget(self.samplingRateInput,5)
+        self.rowLayout.addStretch(1)
+        self.rowLayout.addWidget(self.snrEnable,2)
+        self.rowLayout.addWidget(self.snrSlider,8)
+        self.rowLayout.addWidget(self.snrInput,5)
+        # self.rowLayout.addStretch(20)
+
+
+        self.layout = QVBoxLayout()
+        self.layout.addLayout(self.rowLayout)
         self.setLayout(self.layout)
 
     def loadSignal(self):
