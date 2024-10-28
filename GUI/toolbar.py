@@ -5,8 +5,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QSlider, QComboBox, QDoubleSpinBox, \
     QFileDialog, QCheckBox
 
-from Styles.ToolBarStyling import toolBarStyle, buttonStyle, buttonWhiteStyle, comboBoxStyle, sliderStyle, TitleStyle, \
-    numberInputStyle
+from Styles.ToolBarStyling import toolBarStyle, buttonStyle, buttonWhiteStyle, comboBoxStyle, sliderOnStyle,sliderOffStyle, TitleStyle, labelOffStyle,labelOnStyle, numberInputOffStyle,numberInputOnStyle
 
 
 class ToolBar(QWidget):
@@ -41,12 +40,13 @@ class ToolBar(QWidget):
 
 
         self.snrEnable = QCheckBox("SNR: ")
+        self.snrEnable.setStyleSheet(labelOffStyle)
         self.snrSlider = QSlider(Qt.Horizontal)
-        self.snrSlider.setStyleSheet(sliderStyle)
+        self.snrSlider.setStyleSheet(sliderOffStyle)
         self.snrInput = QDoubleSpinBox()
         self.snrInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
         self.snrInput.setAlignment(Qt.AlignCenter)
-        self.snrInput.setStyleSheet(numberInputStyle)
+        self.snrInput.setStyleSheet(numberInputOffStyle)
 
         self.snrSlider.setRange(0, 30)
 
@@ -75,20 +75,20 @@ class ToolBar(QWidget):
         self.samplingSlider = QSlider(Qt.Horizontal)
         self.samplingSlider.setRange(0, 400)
         self.samplingSlider.setSingleStep(1)
-        self.samplingSlider.setStyleSheet(sliderStyle)
+        self.samplingSlider.setStyleSheet(sliderOnStyle)
 
         self.samplingRateLabel = QLabel("sampling rate: ")
         self.samplingRateInput = QDoubleSpinBox()
         self.samplingRateInput.setRange(0, float('inf'))
         self.samplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
         self.samplingRateInput.setAlignment(Qt.AlignRight)
-        self.samplingRateInput.setStyleSheet(numberInputStyle)
+        self.samplingRateInput.setStyleSheet(numberInputOnStyle)
         self.samplingRateInput.setSuffix("Hz")
 
         self.normSamplingRateInput = QDoubleSpinBox()
         self.normSamplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
         self.normSamplingRateInput.setAlignment(Qt.AlignCenter)
-        self.normSamplingRateInput.setStyleSheet(numberInputStyle)
+        self.normSamplingRateInput.setStyleSheet(numberInputOnStyle)
         self.normSamplingRateInput.setSuffix(" fmax")
         self.normSamplingRateInput.setRange(0,4)
 
@@ -148,6 +148,15 @@ class ToolBar(QWidget):
 
         self.snrSlider.setEnabled(is_enabled)
         self.snrInput.setEnabled(is_enabled)
+
+        if is_enabled:
+            self.snrSlider.setStyleSheet(sliderOnStyle)
+            self.snrInput.setStyleSheet(numberInputOnStyle)
+            self.snrEnable.setStyleSheet(labelOnStyle)
+        else:
+            self.snrSlider.setStyleSheet(sliderOffStyle)
+            self.snrInput.setStyleSheet(numberInputOffStyle)
+            self.snrEnable.setStyleSheet(labelOffStyle)
 
 
     def on_delete_clicked(self):
