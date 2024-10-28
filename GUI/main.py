@@ -288,10 +288,14 @@ class MainApp(QMainWindow):
         self.old_type = signal_type
 
         mixed_signal = mixer(self.signalData, amplitude, frequency,signal_type)
+        # print(self.signalData[:, 1])
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal)) 
+        # print(self.signalData[:, 1])
+
 
         # self.originalSignal.clear()
         # self.originalSignal.plot(self.signalData[:, 0], mixed_signal, pen=mkPen(color="b", width=2), name="Mixed Signal")
+        combined_signal = np.column_stack((self.signalData[:, 0], mixed_signal))
 
         self.updateSignalData(self.signalData)
 
@@ -351,9 +355,9 @@ class MainApp(QMainWindow):
 
 
 if __name__ == "__main__":
-    csv_file_path = 'signals_data/ECG_Normal.csv'
+    csv_file_path = '../signals_data/ECG_Abnormal.csv'
     app = QApplication(sys.argv)
-    main_app = MainApp()
+    main_app = MainApp(csv_file_path)
     main_app.show()
     sys.exit(app.exec_())
 

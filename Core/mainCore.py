@@ -102,11 +102,16 @@ class SignalSamplingApp(QtWidgets.QWidget):
     def __init__(self, csv_file_path):
         super().__init__()
 
+        # self.data_loader = DataLoader(csv_file_path)  # Load data from CSV
+        # self.signal = self.data_loader.get_data().flatten()  # Flatten to ensure 1D array
+        # self.max_time_axis = len(self.signal)
+        # self.time = np.linspace(0, self.max_time_axis / 1000, self.max_time_axis)  # Assuming a sample rate of 1000Hz
         self.data_loader = DataLoader(csv_file_path)  # Load data from CSV
-        self.signal = self.data_loader.get_data().flatten()  # Flatten to ensure 1D array
-        self.max_time_axis = len(self.signal)
-        self.time = np.linspace(0, self.max_time_axis / 1000, self.max_time_axis)  # Assuming a sample rate of 1000Hz
+        data = self.data_loader.get_data()  # Get the loaded data as a NumPy array
+        self.time = data[:, 0]  # Extract the first column as time
+        self.signal = data[:, 1]  # Extract the second column as amplitude
 
+        # self.max_time_axis = len(self.signal)
         self.f_max = calculate_max_frequency(self.signal, self.time)
         self.sampling_rate = 2
 
@@ -164,7 +169,7 @@ class SignalSamplingApp(QtWidgets.QWidget):
 
         self.reconstruction_method_comboBox = QtWidgets.QComboBox(self)
         self.reconstruction_method_comboBox.addItems(
-            ["Whittaker-Shannon (sinc)", "Linear"])
+            ["Whittaker-Shannon (sinc)", "Linear","Zero-Order Hold"," Cubic-Spline"])
         self.reconstruction_method_comboBox.currentTextChanged.connect(self.update_reconstruction_method)
 
         reconstruction_layout.addWidget(self.reconstruction_method_comboBox)

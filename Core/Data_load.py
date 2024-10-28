@@ -32,7 +32,7 @@ class DataLoader:
 
     def get_data(self):
         """Return the loaded data."""
-        return self.data.to_numpy()
+        return self.data.to_numpy()[:1000]
 
 
 
