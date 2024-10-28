@@ -12,14 +12,14 @@ from Core.mixer import mixer, remove_elements
 from Core.noise import add_noise 
 
 class MainApp(QMainWindow):
-    def __init__(self,file_path):
+    def __init__(self):
         super().__init__()
 
-        # self.signalData = self.generate_default_data()
-        # self.reconstructedSignalData = self.generate_default_data()
+        self.signalData = self.generate_default_data()
+        self.reconstructedSignalData = self.generate_default_data()
         
-        self.data_loader = DataLoader(file_path)
-        self.signalData = self.data_loader.get_data() 
+        # self.data_loader = DataLoader(file_path)
+        # self.signalData = self.data_loader.get_data()
         self.mixedSignalData = None  
         self.reconstructedSignalData = self.signalData
 
@@ -199,9 +199,12 @@ class MainApp(QMainWindow):
         mixed_signal = mixer(self.signalData, amplitude, frequency,signal_type)
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal)) 
 
-        self.originalSignal.clear()
-        self.originalSignal.plot(self.signalData[:, 0], mixed_signal, pen=mkPen(color="b", width=2), name="Mixed Signal")
-        
+        # self.originalSignal.clear()
+        # self.originalSignal.plot(self.signalData[:, 0], mixed_signal, pen=mkPen(color="b", width=2), name="Mixed Signal")
+        combined_signal = np.column_stack((self.signalData[:, 0], mixed_signal))
+
+        self.updateSignalData(combined_signal)
+
         snr_value = self.controlBar.snrSlider.value()
         noisy_signal = add_noise(mixed_signal, snr_value)
 
@@ -222,7 +225,7 @@ class MainApp(QMainWindow):
 if __name__ == "__main__":
     csv_file_path = 'signals_data/ECG_Normal.csv'
     app = QApplication(sys.argv)
-    main_app = MainApp(csv_file_path)
+    main_app = MainApp()
     main_app.show()
     sys.exit(app.exec_())
 

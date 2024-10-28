@@ -10,8 +10,9 @@ class Composer(QWidget):
     valueUpdated = pyqtSignal(int, float, float, str)
     def __init__(self):
         super().__init__()
-        self.composerTitle = QLabel("Mixer")
-        self.composerTitle.setObjectName("composerTitle")  
+        self.composerTitle = QLabel("Signal Mixer")
+        self.composerTitle.setObjectName("composerTitle")
+        self.composerTitle.setAlignment(Qt.AlignCenter)
         self.composerTitle.setStyleSheet(composerTitleStyle)
 
         self.functionType = QComboBox()
@@ -23,10 +24,13 @@ class Composer(QWidget):
 
         self.amplitudeLabel = QLabel("Amplitude")
         self.amplitudeInput = QDoubleSpinBox()
+        self.amplitudeInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
         self.amplitudeInput.setStyleSheet(doubleSpinBoxStyle)
 
         self.frequencyLabel = QLabel("Frequency")
         self.frequencyInput = QDoubleSpinBox()
+        self.frequencyInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        self.frequencyInput.setSuffix("Hz")
         self.frequencyInput.setStyleSheet(doubleSpinBoxStyle)
 
         self.addButton = QPushButton("Add")
@@ -70,6 +74,8 @@ class Composer(QWidget):
     def emit_values(self):
         amplitude = self.amplitudeInput.value()
         frequency = self.frequencyInput.value()
+        if amplitude == 0 or frequency == 0:
+            return
         signal_type = self.functionType.currentText()
         self.valueAdded.emit(amplitude, frequency,signal_type)
         self.add_to_table(signal_type, amplitude, frequency) 
@@ -81,7 +87,16 @@ class Composer(QWidget):
         self.componentsTable.setItem(row, 0, QTableWidgetItem(signal_type))
         self.componentsTable.setItem(row, 1, QTableWidgetItem(str(amplitude)))
         self.componentsTable.setItem(row, 2, QTableWidgetItem(str(frequency)))
-    
+
+        delete_button = QPushButton("Delete")
+        button_widget = QWidget()
+        button_layout = QHBoxLayout(button_widget)
+        button_layout.addWidget(delete_button)
+        button_layout.setAlignment(Qt.AlignCenter)  # Center the button
+        button_layout.setContentsMargins(0, 0, 0, 0)  # Remove spacing around the button
+
+        self.componentsTable.setCellWidget(row, 3, button_widget)
+
     def handle_table_edit(self, row, column):
         try:
             signal_type = self.componentsTable.item(row, 0).text()
