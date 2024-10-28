@@ -9,7 +9,8 @@ from toolbar import ToolBar
 from Composer import Composer
 from Core.Data_load import DataLoader
 from Core.mixer import mixer, remove_elements
-from Core.noise import add_noise 
+from Core.noise import add_noise
+from Core.mainCore import sample_and_reconstruct, sinc_interp,linear_interp, calculate_max_frequency
 
 class MainApp(QMainWindow):
     def __init__(self):
@@ -19,9 +20,23 @@ class MainApp(QMainWindow):
         self.old_frequency = None
         self.old_type = None
 
+
+        self.interp_methods = {
+            "Whittaker-Shannon (sinc)": sinc_interp,
+            "Linear": linear_interp
+        }
+        self.interp_method = self.interp_methods["Whittaker-Shannon (sinc)"]
+
         self.signalData = self.generate_default_data()
-        self.reconstructedSignalData = self.generate_default_data()
-        
+        self.signalfMax = calculate_max_frequency(self.signalData[:, 1],self.signalData[:, 0])
+        print(self.signalfMax)
+
+
+        self.sampling_rate = 900
+
+        # self.reconstructedSignalData = self.generate_default_data()
+
+
         # self.data_loader = DataLoader(file_path)
         # self.signalData = self.data_loader.get_data()
         self.mixedSignalData = None  
@@ -36,6 +51,7 @@ class MainApp(QMainWindow):
 
 
         self.controlBar = ToolBar()
+        self.controlBar.signalfMax = self.signalfMax
         self.snr_enabled = False
         # self.controlBar.setStyleSheet("background:red;")
         self.controlBar.dataLoaded.connect(self.updateSignalData)
@@ -170,22 +186,23 @@ class MainApp(QMainWindow):
 
             else:
                 noisy_signal = y
-            
 
-        if self.reconstructedSignalData.shape[1] >= 2:
-            x = self.reconstructedSignalData[:, 0]
-            y = self.reconstructedSignalData[:, 1]
+        self.sampledTime,self.sampledSignal,self.reconstructedSignalData = sample_and_reconstruct(self.signalData[:, 0], self.signalData[:, 1], self.sampling_rate, self.interp_method)
+        x = self.signalData[:, 0]
+        y = self.reconstructedSignalData
+        # print(np.dim(y))
 
-            self.reconstructedSignal.clear()
-            self.reconstructedSignal.plot(x, y, pen=mkPen(color="b", width=2), name="Original Signal")
+        self.reconstructedSignal.clear()
+        self.reconstructedSignal.plot(x, y, pen=mkPen(color="b", width=2), name="Original Signal")
 
         print("Signal Data Updated:")
         print(self.signalData)
 
         self.diffrenceGraph.clear()
-        if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.shape[1] >= 2:
-            difference = self.calculate_difference(self.signalData[:, 1], self.reconstructedSignalData[:, 1])
-            self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2), name="Difference")
+        if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.ndim == 1:
+            difference = self.calculate_difference(self.signalData[:, 1], self.reconstructedSignalData)
+            self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2),
+                                     name="Difference")
 
         self.plot_frequency_domain(self.signalData[:, 1], noisy_signal, self.signalData[1, 0] - self.signalData[0, 0])
 
