@@ -30,6 +30,7 @@ class Composer(QWidget):
         self.frequencyLabel = QLabel("Frequency")
         self.frequencyInput = QDoubleSpinBox()
         self.frequencyInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        self.frequencyInput.setRange(0, float('inf'))
         self.frequencyInput.setSuffix("Hz")
         self.frequencyInput.setStyleSheet(doubleSpinBoxStyle)
 
