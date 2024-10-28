@@ -11,6 +11,7 @@ from Styles.ToolBarStyling import toolBarStyle, buttonStyle, buttonWhiteStyle, c
 class ToolBar(QWidget):
     dataLoaded = pyqtSignal(pd.DataFrame)
     snrChanged = pyqtSignal(float)
+    methodChanged = pyqtSignal(str)
     snrEnabledChanged = pyqtSignal(bool)
     deleteSignal = pyqtSignal()
 
@@ -70,8 +71,7 @@ class ToolBar(QWidget):
         self.samplingMethod = QComboBox()
         self.samplingMethod.setStyleSheet(comboBoxStyle)
         self.samplingMethod.addItem("Nyquist–Shannon")
-        self.samplingMethod.addItem("second Method")
-        self.samplingMethod.addItem("Third Method")
+        self.samplingMethod.addItem("Linear")
 
 
         self.samplingSlider = QSlider(Qt.Horizontal)
@@ -99,6 +99,7 @@ class ToolBar(QWidget):
         self.normSamplingRateInput.valueChanged.connect(lambda: self.samplingRateInput.setValue(self.signalfMax * self.normSamplingRateInput.value()))
         self.samplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value / self.signalfMax * 100)) if self.signalfMax else None)
         self.samplingRateInput.valueChanged.connect(self.on_sampling_rate_changed)
+        self.samplingMethod.currentIndexChanged.connect(self.onMethodChanged)
 
         self.rowLayout = QHBoxLayout()
         self.rowLayout.addWidget(self.title, 1)
@@ -144,6 +145,8 @@ class ToolBar(QWidget):
     def on_sampling_rate_changed(self, value):
         self.samplingRateChanged.emit(value)
 
+    def onMethodChanged(self, value):
+        self.methodChanged.emit(self.samplingMethod.currentText())
     def on_snr_changed(self, value):
         self.snrChanged.emit(value / 1.0)
 

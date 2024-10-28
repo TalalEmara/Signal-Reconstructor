@@ -62,6 +62,7 @@ class MainApp(QMainWindow):
         self.controlBar.snrEnabledChanged.connect(self.set_snr_enabled)
         self.controlBar.snrChanged.connect(self.updateNoise)
         self.controlBar.samplingRateChanged.connect(self.updateSamplingRate)
+        self.controlBar.methodChanged.connect(self.updateSamplingMethod)
 
 
         self.current_signal_index = None  
@@ -182,7 +183,11 @@ class MainApp(QMainWindow):
             # Handle the exception (e.g., log it or show a message)
             print(f"An error occurred while updating signal data: {e}")
 
-
+    def updateSamplingMethod(self, method):
+        print(method)
+        self.interp_method = self.interp_methods[method]
+        print(self.interp_method)
+        self.updateSignalData(self.signalData)
     def updateSignalData(self, data):
         self.signalData = np.array(data)
         snr_value = self.controlBar.snrSlider.value()
