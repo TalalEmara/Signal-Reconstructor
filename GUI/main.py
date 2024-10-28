@@ -10,7 +10,7 @@ from Composer import Composer
 from Core.Data_load import DataLoader
 from Core.mixer import mixer, remove_elements
 from Core.noise import add_noise
-from Core.mainCore import sample_and_reconstruct, sinc_interp,linear_interp, calculate_max_frequency
+from Core.mainCore import sample_and_reconstruct, sinc_interp,linear_interp, calculate_max_frequency,zoh_reconstruction,cubic_spline_interp
 
 class MainApp(QMainWindow):
     def __init__(self):
@@ -23,7 +23,9 @@ class MainApp(QMainWindow):
 
         self.interp_methods = {
             "Whittaker-Shannon (sinc)": sinc_interp,
-            "Linear": linear_interp
+            "Linear": linear_interp,
+            "Zero-Order Hold": zoh_reconstruction,
+            "Cubic-Spline":cubic_spline_interp
         }
         self.interp_method = self.interp_methods["Whittaker-Shannon (sinc)"]
 
