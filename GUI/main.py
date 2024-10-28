@@ -13,7 +13,7 @@ from Core.noise import add_noise
 from Core.mainCore import sample_and_reconstruct, sinc_interp,linear_interp, calculate_max_frequency,zoh_reconstruction,cubic_spline_interp
 
 class MainApp(QMainWindow):
-    def __init__(self):
+    def __init__(self,csv_file_path):
         super().__init__()
 
         self.old_amplitude = None
@@ -29,7 +29,9 @@ class MainApp(QMainWindow):
         }
         self.interp_method = self.interp_methods["Whittaker-Shannon (sinc)"]
 
-        self.signalData = self.generate_default_data()
+        # self.signalData = self.generate_default_data()
+        self.data_loader = DataLoader(csv_file_path)  # Load data from CSV
+        self.signalData = self.data_loader.get_data()
         self.signalfMax = calculate_max_frequency(self.signalData[:, 1],self.signalData[:, 0])
         print(self.signalfMax)
 
@@ -39,8 +41,6 @@ class MainApp(QMainWindow):
         # self.reconstructedSignalData = self.generate_default_data()
 
 
-        # self.data_loader = DataLoader(file_path)
-        # self.signalData = self.data_loader.get_data()
         self.mixedSignalData = None  
         self.reconstructedSignalData = self.signalData
 
@@ -355,7 +355,7 @@ class MainApp(QMainWindow):
 
 
 if __name__ == "__main__":
-    csv_file_path = '../signals_data/ECG_Abnormal.csv'
+    csv_file_path = '../signals_data/EEG_Abnormal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
