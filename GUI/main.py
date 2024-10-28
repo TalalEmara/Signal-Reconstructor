@@ -32,10 +32,13 @@ class MainApp(QMainWindow):
 
 
         self.controlBar = ToolBar()
+        self.snr_enabled = False
         # self.controlBar.setStyleSheet("background:red;")
         self.controlBar.dataLoaded.connect(self.updateSignalData)
         self.controlBar.dataLoaded.connect(lambda data: self.updateSignalData(data.to_numpy()))
+        self.controlBar.snrEnabledChanged.connect(self.set_snr_enabled)
         self.controlBar.snrChanged.connect(self.updateNoise)
+        
 
         self.current_signal_index = None  
       
@@ -118,9 +121,13 @@ class MainApp(QMainWindow):
         if x_min < 0:
             plot_widget.setXRange(0, x_max, padding=0)
     
-
+    def set_snr_enabled(self, enabled):
+        self.snr_enabled = enabled
+        self.updateSignalData(self.signalData)
     
     def updateNoise(self, snr_value):
+        if not self.snr_enabled: 
+            return
       
         if self.mixedSignalData is not None:
             x = self.mixedSignalData[:, 0]
@@ -154,9 +161,13 @@ class MainApp(QMainWindow):
             self.originalSignal.clear()
             self.originalSignal.plot(x, y, pen=mkPen(color="b", width=2), name="Original Signal")
                 
-            noisy_signal = add_noise(y, snr_value)
-            self.originalSignal.plot(x, noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal")
+            if self.snr_enabled:
+                noisy_signal = add_noise(y, snr_value)
+                self.originalSignal.plot(x, noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal")
 
+            else:
+                noisy_signal = y
+            
 
         if self.reconstructedSignalData.shape[1] >= 2:
             x = self.reconstructedSignalData[:, 0]
@@ -199,7 +210,9 @@ class MainApp(QMainWindow):
 
         self.frequencyDomain.clear()
         self.frequencyDomain.plot(original_positive_frequencies, original_magnitudes, pen=mkPen(color="b", width=2), name="Original Signal Frequency Domain")
-        self.frequencyDomain.plot(original_positive_frequencies, noisy_magnitudes, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal Frequency Domain")
+        
+        if self.snr_enabled:
+            self.frequencyDomain.plot(original_positive_frequencies, noisy_magnitudes, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal Frequency Domain")
     
     def add_mixed_signal(self, amplitude, frequency,signal_type):
         mixed_signal = mixer(self.signalData, amplitude, frequency,signal_type)
@@ -212,19 +225,23 @@ class MainApp(QMainWindow):
         self.updateSignalData(combined_signal)
 
         snr_value = self.controlBar.snrSlider.value()
-        noisy_signal = add_noise(mixed_signal, snr_value)
+        noisy_signal = add_noise(mixed_signal, snr_value) if self.snr_enabled else mixed_signal
 
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Mixed Signal")
-        
         time_step = self.signalData[1, 0] - self.signalData[0, 0]
         self.plot_frequency_domain(mixed_signal, noisy_signal, time_step)
 
-    def update_table_mixed_signal(self, row, amplitude, frequency, signal_type):
-        updated_signal = mixer(self.signalData[:, 1], amplitude, frequency, signal_type)
+    def update_table_mixed_signal(self, row, amplitude, frequency,signal_type):
+        updated_signal = mixer(self.signalData, amplitude, frequency,signal_type)
+        self.signalData = np.column_stack((self.signalData[:, 0], updated_signal))
+
+        self.originalSignal.clear()
+        self.originalSignal.plot(self.signalData[:, 0], updated_signal, pen=mkPen(color="b", width=2), name=f"Updated Signal Row {row}")
         
-        # Replace the row-specific signal component
-        self.signalData[:, 1] = updated_signal
-        self.updateSignalData(self.signalData)
+        snr_value = self.controlBar.snrSlider.value()
+        noisy_signal = add_noise(updated_signal, snr_value) if self.snr_enabled else updated_signal
+        self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Updated Signal")
+
 
 if __name__ == "__main__":
     csv_file_path = 'signals_data/ECG_Normal.csv'

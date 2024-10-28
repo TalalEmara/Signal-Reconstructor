@@ -12,7 +12,9 @@ from Styles.ToolBarStyling import toolBarStyle, buttonStyle, buttonWhiteStyle, c
 class ToolBar(QWidget):
     dataLoaded = pyqtSignal(pd.DataFrame)
     snrChanged = pyqtSignal(float)
+    snrEnabledChanged = pyqtSignal(bool)
     deleteSignal = pyqtSignal() 
+
     def __init__(self):
         super().__init__()
         self.setAttribute(Qt.WA_StyledBackground, True)
@@ -54,9 +56,13 @@ class ToolBar(QWidget):
         self.snrInput.setValue(30)
         self.snrInput.setAlignment(Qt.AlignCenter)
 
+        self.snrSlider.setEnabled(False)
+        self.snrInput.setEnabled(False)
+
         self.snrSlider.valueChanged.connect(lambda value: self.snrInput.setValue(value / 1.0))  # Convert to float
         self.snrInput.valueChanged.connect(lambda value: self.snrSlider.setValue(int(value)))
         self.snrSlider.valueChanged.connect(self.on_snr_changed)
+        self.snrEnable.stateChanged.connect(self.on_snr_enabled_changed)
 
         self.samplingMethodLabel = QLabel("reconstruction method: ")
         self.samplingMethod = QComboBox()
@@ -134,6 +140,15 @@ class ToolBar(QWidget):
 
     def on_snr_changed(self, value):
         self.snrChanged.emit(value / 1.0) 
+    
+
+    def on_snr_enabled_changed(self, state):
+        is_enabled = state == Qt.Checked
+        self.snrEnabledChanged.emit(is_enabled)
+
+        self.snrSlider.setEnabled(is_enabled)
+        self.snrInput.setEnabled(is_enabled)
+
 
     def on_delete_clicked(self):
         self.deleteSignal.emit()

@@ -8,6 +8,7 @@ from Styles.ComposerStyling import composerTitleStyle, comboBoxStyle, doubleSpin
 class Composer(QWidget):
     valueAdded = pyqtSignal(float, float,str)
     valueUpdated = pyqtSignal(int, float, float, str)
+    
     def __init__(self):
         super().__init__()
         self.composerTitle = QLabel("Signal Mixer")
@@ -71,6 +72,7 @@ class Composer(QWidget):
 
         self.addButton.clicked.connect(self.emit_values)
         self.componentsTable.cellChanged.connect(self.handle_table_edit)
+        
 
     def emit_values(self):
         amplitude = self.amplitudeInput.value()
