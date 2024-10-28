@@ -77,16 +77,25 @@ comboBoxStyle = """
 }
 
 """
-sliderStyle = """
-QSlider::handle {
-            background-color: #2252A0;
-            width: 5px;
-            height: 7px;
-            border-radius: 5px;
-        }
-        """
+sliderOnStyle = """
+            QSlider::handle {
+                background-color: #2252A0;
+                width: 5px;
+                height: 7px;
+                border-radius: 5px;
+            }
+"""
 
-numberInputStyle = """
+sliderOffStyle = """
+            QSlider::handle {
+                background-color: gray;
+                width: 5px;
+                height: 7px;
+                border-radius: 5px;
+            }
+"""
+
+numberInputOnStyle = """
     QDoubleSpinBox{
         color: #2252A0;
         padding:2px;
@@ -94,4 +103,26 @@ numberInputStyle = """
         border-radius: 5px;  
     }
     
+"""
+numberInputOffStyle = """
+            QDoubleSpinBox {
+                color: gray;
+                padding: 2px;
+                border: 2px solid gray;
+                border-radius: 5px;
+            }
+"""
+
+labelOnStyle = """
+            QCheckBox {
+                color: #2252A0;
+                font-weight: bold;
+            }
+"""
+
+labelOffStyle = """
+            QCheckBox {
+                color: gray;
+                font-weight: bold;
+            }
 """
