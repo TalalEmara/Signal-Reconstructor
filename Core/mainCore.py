@@ -4,6 +4,7 @@ import pandas as pd
 from PyQt5 import QtCore, QtWidgets
 import pyqtgraph as pg
 from scipy.fft import fft, fftfreq
+import Reconst_methods as methods
 
 class DataLoader:
     """Class to load data from a CSV file."""
@@ -35,6 +36,7 @@ class DataLoader:
     def get_data(self):
         """Return the first 1000 points of the loaded data as a NumPy array."""
         return self.data.to_numpy()[:1000]
+
 
 def sinc_interp(sample_points, sample_values, interpolated_points):
     T = sample_points[1] - sample_points[0]
@@ -77,18 +79,19 @@ class SignalSamplingApp(QtWidgets.QWidget):
         super().__init__()
 
         self.data_loader = DataLoader(csv_file_path)  # Load data from CSV
-        data = self.data_loader.get_data()  # Get the loaded data as a NumPy array
-        self.time = data[:, 0]  # Extract the first column as time
-        self.signal = data[:, 1]  # Extract the second column as amplitude
+        self.signal = self.data_loader.get_data().flatten()  # Flatten to ensure 1D array
+        self.max_time_axis = len(self.signal)
+        self.time = np.linspace(0, self.max_time_axis / 1000, self.max_time_axis)  # Assuming a sample rate of 1000Hz
 
-        # self.max_time_axis = len(self.signal)
         self.f_max = calculate_max_frequency(self.signal, self.time)
         self.sampling_rate = 2
 
         self.initUI()
         self.interp_methods = {
             "Whittaker-Shannon (sinc)": sinc_interp,
-            "Linear": linear_interp
+            "Linear": linear_interp,
+            "Zero-Order Hold": methods.zoh_reconstruction,
+            "Cubic-Spline":methods.cubic_spline_interp
         }
 
         self.interp_method = self.interp_methods["Whittaker-Shannon (sinc)"]
@@ -147,7 +150,7 @@ class SignalSamplingApp(QtWidgets.QWidget):
 
     def update_sampling_slider(self):
         """Reconfigure the sampling slider based on the current f_max."""
-        self.sampling_slider.setMaximum(int(4 * self.f_max))
+        self.sampling_slider.setMaximum(int((4 * self.f_max)))
         self.sampling_slider.setTickInterval(int(self.f_max))
         self.sampling_slider.setValue(min(self.sampling_rate, 4 * self.f_max))
         self.sampling_label.setText(f"Sampling Frequency: {self.sampling_slider.value()}")
@@ -215,6 +218,7 @@ class SignalSamplingApp(QtWidgets.QWidget):
 
     def main(self):
         self.show()
+
 
 if __name__ == '__main__':
     csv_file_path = '../signals_data/EEG_Abnormal.csv'  # Specify the path to your CSV file
