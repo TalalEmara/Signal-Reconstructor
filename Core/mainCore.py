@@ -4,7 +4,7 @@ import pandas as pd
 from PyQt5 import QtCore, QtWidgets
 import pyqtgraph as pg
 from scipy.fft import fft, fftfreq
-import Reconst_methods as methods
+from scipy.interpolate import CubicSpline
 
 class DataLoader:
     """Class to load data from a CSV file."""
@@ -44,6 +44,30 @@ def sinc_interp(sample_points, sample_values, interpolated_points):
 
 def linear_interp(sample_points, sample_values, interpolated_points):
     return np.interp(interpolated_points, sample_points, sample_values)
+
+def zoh_reconstruction(sample_points, sample_values, interpolated_points):
+
+    reconstructed_signal = np.zeros_like(interpolated_points)
+    
+    # Loop through each interval and hold the last sample value constant until the next sampled point
+    for i in range(len(sample_points) - 1):
+        
+        mask = (interpolated_points >= sample_points[i]) & (interpolated_points < sample_points[i + 1])
+        reconstructed_signal[mask] = sample_values[i]
+
+    reconstructed_signal[interpolated_points >= sample_points[-1]] = sample_values[-1]
+    
+    return reconstructed_signal
+
+
+def cubic_spline_interp(sample_points, sample_values, interpolated_points):
+        
+    cubic_spline = CubicSpline(sample_points, sample_values)
+    
+    # Evaluate the spline over the full time range
+    reconstructed_signal = cubic_spline(interpolated_points)
+    
+    return reconstructed_signal
 
 def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
     sample_indices = np.linspace(0, len(time) - 1, sampling_rate).astype(int)
@@ -90,8 +114,8 @@ class SignalSamplingApp(QtWidgets.QWidget):
         self.interp_methods = {
             "Whittaker-Shannon (sinc)": sinc_interp,
             "Linear": linear_interp,
-            "Zero-Order Hold": methods.zoh_reconstruction,
-            "Cubic-Spline":methods.cubic_spline_interp
+            "Zero-Order Hold": zoh_reconstruction,
+            "Cubic-Spline":cubic_spline_interp
         }
 
         self.interp_method = self.interp_methods["Whittaker-Shannon (sinc)"]

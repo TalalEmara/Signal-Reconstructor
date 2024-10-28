@@ -72,6 +72,8 @@ class ToolBar(QWidget):
         self.samplingMethod.setStyleSheet(comboBoxStyle)
         self.samplingMethod.addItem("Nyquist–Shannon")
         self.samplingMethod.addItem("Linear")
+        self.samplingMethod.addItem("Cubic-spline")
+        self.samplingMethod.addItem("Zero-order")
 
 
         self.samplingSlider = QSlider(Qt.Horizontal)
