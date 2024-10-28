@@ -100,18 +100,27 @@ class Composer(QWidget):
         button_layout.setContentsMargins(0, 0, 0, 0)  # Remove spacing around the button
 
         print(row, amplitude, frequency, signal_type)
-        delete_button.clicked.connect(lambda: self.remove_from_table(row, amplitude, frequency, signal_type))
+
+        delete_button.clicked.connect(lambda _, btn=delete_button: self.remove_row_by_button(
+            btn, amplitude=amplitude, frequency=frequency, signal_type=signal_type
+        ))
 
         self.componentsTable.setCellWidget(row, 3, button_widget)
 
-    def remove_from_table(self, row, amplitude, frequency, signal_type):
-        if row >= 0 < self.componentsTable.rowCount():
-            self.valueRemoved.emit(amplitude, frequency, signal_type)
-            self.componentsTable.removeRow(row)
-            print(f"Row {row} removed.")
-        else:
-            print("Invalid row index.")
+    def remove_row_by_button(self, button, amplitude, frequency, signal_type):
+        # Get the row of the button clicked
+        index = self.componentsTable.indexAt(button.parentWidget().pos())
+        row = index.row()
 
+        if row != -1:  # Ensure it's a valid row
+            self.remove_from_table(row, amplitude, frequency, signal_type)
+
+    def remove_from_table(self, row, amplitude, frequency, signal_type):
+        # Additional code to handle removal logic here
+        self.valueRemoved.emit(amplitude, frequency, signal_type)
+        self.componentsTable.removeRow(row)
+        print(f"Row {row} removed with amplitude={amplitude}, frequency={frequency}, signal_type={signal_type}")            
+        
     def handle_table_edit(self, row, column):
         try:
             signal_type = self.componentsTable.item(row, 0).text()
