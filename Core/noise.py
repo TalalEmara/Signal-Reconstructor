@@ -1,9 +1,4 @@
-import sys
 import numpy as np
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QSlider, QLabel
-from PyQt5.QtCore import Qt
-import pyqtgraph as pg
-
 
 def add_noise(data, snrdb):
     signal_power = np.sum(data ** 2)

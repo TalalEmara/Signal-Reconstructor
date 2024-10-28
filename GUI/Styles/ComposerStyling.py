@@ -1,9 +1,8 @@
-# Styles/ComposerStyling.py
 
 composerTitleStyle = """
     QLabel#composerTitle {
         font-family: "Samsung Sans";
-        font-size: 34px;
+        font-size: 18px;
         font-weight: 600;
         color: #2252A0;
         padding: 5px 0;
@@ -13,7 +12,7 @@ composerTitleStyle = """
 comboBoxStyle = """
     QComboBox {
         font-family: "Samsung Sans";
-        font-size: 18px;
+        font-size: 16px;
         color: #EFEFEF;  /* Text color for the combo box when closed */
         background-color: #2252A0;  /* Background color for the combo box */
         border: 1px solid #174082;
@@ -98,7 +97,7 @@ tableStyle = """
         color: #000000;             
         
     }
-    
+
     QTableWidget QTableCornerButton::section {
         background-color: #2252A0;
         border: 1px solid #174082;

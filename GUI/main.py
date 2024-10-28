@@ -135,6 +135,7 @@ class MainApp(QMainWindow):
         self.originalSignal.plot(x, y, pen=mkPen(color="b", width=2), name="Original or Mixed Signal")
         self.originalSignal.plot(x, noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal")
 
+        self.plot_frequency_domain(y, noisy_signal, x[1] - x[0])
     
     def generate_default_data(self): #testing
         time = np.linspace(0, 1, 1000)
@@ -173,8 +174,9 @@ class MainApp(QMainWindow):
             difference = self.calculate_difference(self.signalData[:, 1], self.reconstructedSignalData[:, 1])
             self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2), name="Difference")
 
-
-        self.plot_frequency_domain(self.signalData[:, 1], self.signalData[1, 0] - self.signalData[0, 0])
+        self.plot_frequency_domain(self.signalData[:, 1], noisy_signal, self.signalData[1, 0] - self.signalData[0, 0])
+        
+    
 
     def calculate_difference(self, signal1, signal2):
 
@@ -183,18 +185,22 @@ class MainApp(QMainWindow):
         padded_signal2 = np.pad(signal2, (0, length - len(signal2)), 'constant')
         return padded_signal1 - padded_signal2
     
-    def plot_frequency_domain(self, amplitude, time_step):
-        N = len(amplitude)
-        fft_values = np.fft.fft(amplitude)
-        fft_frequencies = np.fft.fftfreq(N, d=time_step)
+    def plot_frequency_domain(self, original_amplitude, noisy_amplitude,time_step):
+        N = len(original_amplitude)
 
-        positive_frequencies = fft_frequencies[:N // 2]
-        magnitudes = np.abs(fft_values[:N // 2])
+        original_fft_values = np.fft.fft(original_amplitude)
+        original_fft_frequencies = np.fft.fftfreq(N, d=time_step)
+        original_positive_frequencies = original_fft_frequencies[:N // 2]
+        original_magnitudes = np.abs(original_fft_values[:N // 2])
+
+        noisy_fft_values = np.fft.fft(noisy_amplitude)
+        noisy_magnitudes = np.abs(noisy_fft_values[:N // 2])
 
 
         self.frequencyDomain.clear()
-        self.frequencyDomain.plot(positive_frequencies, magnitudes, pen=mkPen(color="r", width=2), name="Frequency Domain")
-
+        self.frequencyDomain.plot(original_positive_frequencies, original_magnitudes, pen=mkPen(color="b", width=2), name="Original Signal Frequency Domain")
+        self.frequencyDomain.plot(original_positive_frequencies, noisy_magnitudes, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal Frequency Domain")
+    
     def add_mixed_signal(self, amplitude, frequency,signal_type):
         mixed_signal = mixer(self.signalData, amplitude, frequency,signal_type)
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal)) 
@@ -209,18 +215,16 @@ class MainApp(QMainWindow):
         noisy_signal = add_noise(mixed_signal, snr_value)
 
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Mixed Signal")
-
-    def update_table_mixed_signal(self, row, amplitude, frequency,signal_type):
-        updated_signal = mixer(self.signalData, amplitude, frequency,signal_type)
-        self.signalData = np.column_stack((self.signalData[:, 0], updated_signal))
-
-        self.originalSignal.clear()
-        self.originalSignal.plot(self.signalData[:, 0], updated_signal, pen=mkPen(color="b", width=2), name=f"Updated Signal Row {row}")
         
-        snr_value = self.controlBar.snrSlider.value()
-        noisy_signal = add_noise(updated_signal, snr_value)
-        self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Updated Signal")
+        time_step = self.signalData[1, 0] - self.signalData[0, 0]
+        self.plot_frequency_domain(mixed_signal, noisy_signal, time_step)
 
+    def update_table_mixed_signal(self, row, amplitude, frequency, signal_type):
+        updated_signal = mixer(self.signalData[:, 1], amplitude, frequency, signal_type)
+        
+        # Replace the row-specific signal component
+        self.signalData[:, 1] = updated_signal
+        self.updateSignalData(self.signalData)
 
 if __name__ == "__main__":
     csv_file_path = 'signals_data/ECG_Normal.csv'
