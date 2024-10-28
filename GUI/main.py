@@ -166,7 +166,7 @@ class MainApp(QMainWindow):
         self.originalSignal.plot(x, noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal")
 
         self.plot_frequency_domain(y, noisy_signal, x[1] - x[0])
-    
+
     def generate_default_data(self): #testing
         time = np.linspace(0, 1, 1000)
         amplitude = np.sin(2 * np.pi * 122 * time)
@@ -221,6 +221,7 @@ class MainApp(QMainWindow):
 
         self.plot_frequency_domain(self.signalData[:, 1], noisy_signal, self.signalData[1, 0] - self.signalData[0, 0])
 
+        self.add_frequency_domain(self.reconstructedSignalData , self.signalData[1, 0] - self.signalData[0, 0])
 
     def calculate_difference(self, signal1, signal2):
 
@@ -228,7 +229,32 @@ class MainApp(QMainWindow):
         padded_signal1 = np.pad(signal1, (0, length - len(signal1)), 'constant')
         padded_signal2 = np.pad(signal2, (0, length - len(signal2)), 'constant')
         return padded_signal1 - padded_signal2
-    
+
+    import numpy as np
+
+    def add_frequency_domain(self, reconstructedSignalData, time_difference):
+        reconstructedSignalData = np.array(reconstructedSignalData)
+
+        # Perform FFT
+        fft_result = np.fft.fft(reconstructedSignalData)
+
+        N = len(reconstructedSignalData)
+        frequencies = np.fft.fftfreq(N, d=time_difference)
+
+        # Calculate the magnitude of the FFT
+        magnitude = np.abs(fft_result)
+
+        # Check if frequency and magnitude arrays are correctly formed
+        if len(frequencies) != len(magnitude):
+            print("Length mismatch between frequencies and magnitudes!")
+            return
+
+        # Plot the positive frequencies and their corresponding magnitudes
+        self.frequencyDomain.plot(frequencies[:N // 2], magnitude[:N // 2], pen=(255, 0, 0), width=2)
+
+        # Optionally, set the axis limits for better visibility
+        self.frequencyDomain.setXRange(0, np.max(frequencies[:N // 2]), padding=0)
+        self.frequencyDomain.setYRange(0, np.max(magnitude[:N // 2]), padding=0)
     def plot_frequency_domain(self, original_amplitude, noisy_amplitude,time_step):
         N = len(original_amplitude)
 
