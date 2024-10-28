@@ -251,7 +251,12 @@ class MainApp(QMainWindow):
 
         self.originalSignal.clear()
         self.originalSignal.plot(self.signalData[:, 0], updated_signal, pen=mkPen(color="b", width=2), name=f"Updated Signal Row {row}")
-        
+
+        combined_signal = np.column_stack((self.signalData[:, 0], updated_signal))
+
+        self.updateSignalData(combined_signal)
+
+
         snr_value = self.controlBar.snrSlider.value()
         noisy_signal = add_noise(updated_signal, snr_value) if self.snr_enabled else updated_signal
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Updated Signal")
@@ -269,6 +274,11 @@ class MainApp(QMainWindow):
         # Plot the updated mixed signal
         self.originalSignal.plot(self.signalData[:, 0], old_signal, pen=mkPen(color="b", width=2), name="Updated Mixed Signal After Removal")
         
+        combined_signal = np.column_stack((self.signalData[:, 0], old_signal))
+
+        self.updateSignalData(combined_signal)
+
+
         # Get the current SNR value and add noise if enabled
         snr_value = self.controlBar.snrSlider.value()
         noisy_signal = add_noise(old_signal, snr_value) if self.snr_enabled else old_signal
