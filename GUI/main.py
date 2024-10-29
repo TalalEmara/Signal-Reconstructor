@@ -186,8 +186,7 @@ class MainApp(QMainWindow):
         noise_difference = self.calculate_difference(noisy_signal, noisy_signal_reconstructed)
         self.diffrenceGraph.plot(time, noise_difference, pen=mkPen(color="r", width=2),
                                  name="Difference")
-
-        self.plot_frequency_domain( noisy_signal, time[1] - time[0])
+        self.plot_frequency_domain(self.reconstructedSignal, time[1] - time[0])
         self.add_frequency_domain = (noisy_signal_reconstructed, self.signalData[1, 0] - self.signalData[0, 0])
 
     def generate_default_data(self): #testing
@@ -255,6 +254,7 @@ class MainApp(QMainWindow):
                 meanSquareError_item.setPos(0, max_difference * 0.9)
 
                 self.diffrenceGraph.addItem(meanSquareError_item)
+
             self.plot_frequency_domain(amplitude, self.signalData[1, 0] - self.signalData[0, 0])
 
             self.add_frequency_domain =(reconstructed_amplitude, self.signalData[1, 0] - self.signalData[0, 0])
@@ -294,7 +294,7 @@ class MainApp(QMainWindow):
         self.frequencyDomain.setXRange(0, np.max(frequencies[:N // 2]), padding=0)
         self.frequencyDomain.setYRange(0, np.max(magnitude[:N // 2]), padding=0)
 
-    def plot_frequency_domain(self, original_amplitude, noisy_amplitude, time_step):
+    def plot_frequency_domain(self, original_amplitude, time_step):
         N = len(original_amplitude)
 
         original_fft_values = np.fft.fft(original_amplitude)
@@ -302,28 +302,16 @@ class MainApp(QMainWindow):
         original_positive_frequencies = original_fft_frequencies[:N // 2]
         original_magnitudes = np.abs(original_fft_values[:N // 2])
 
-        noisy_fft_values = np.fft.fft(noisy_amplitude)
-        noisy_magnitudes = np.abs(noisy_fft_values[:N // 2])
+
 
         self.frequencyDomain.clear()
-        self.frequencyDomain.plot(original_positive_frequencies, original_magnitudes, pen=mkPen(color="b", width=2),
-                                  name="Original Signal Frequency Domain")
-        self.frequencyDomain.plot(-1 * original_positive_frequencies, original_magnitudes,
-                                  pen=mkPen(color="b", width=2))
+        self.frequencyDomain.plot(original_positive_frequencies, original_magnitudes, pen=mkPen(color="b", width=2), name="Original Signal Frequency Domain")
+        self.frequencyDomain.plot(-1*original_positive_frequencies, original_magnitudes, pen=mkPen(color="b", width=2))
 
-        self.frequencyDomain.plot(self.sampling_rate + original_positive_frequencies, original_magnitudes,
-                                  pen=mkPen(color="r", width=2), )
-        self.frequencyDomain.plot(self.sampling_rate + original_positive_frequencies, original_magnitudes,
-                                  pen=mkPen(color="r", width=2), )
-        self.frequencyDomain.plot(-1 * original_positive_frequencies - self.sampling_rate, original_magnitudes,
-                                  pen=mkPen(color="r", width=2), )
-        self.frequencyDomain.plot(-1 * original_positive_frequencies + self.sampling_rate, original_magnitudes,
-                                  pen=mkPen(color="r", width=2), )
-
-        if self.snr_enabled:
-            self.frequencyDomain.plot(original_positive_frequencies, noisy_magnitudes,
-                                      pen=mkPen(color="r", width=1, style=Qt.DashLine),
-                                      name="Noisy Signal Frequency Domain")
+        self.frequencyDomain.plot(-self.sampling_rate + original_positive_frequencies, original_magnitudes, pen=mkPen(color="r", width=2), )
+        self.frequencyDomain.plot(self.sampling_rate +  original_positive_frequencies, original_magnitudes, pen=mkPen(color="r", width=2), )
+        self.frequencyDomain.plot(-1*original_positive_frequencies - self.sampling_rate, original_magnitudes, pen=mkPen(color="r", width=2), )
+        self.frequencyDomain.plot(-1*original_positive_frequencies + self.sampling_rate, original_magnitudes, pen=mkPen(color="r", width=2), )
 
     def add_mixed_signal(self, amplitude, frequency, signal_type):
         self.old_amplitude = amplitude
@@ -347,7 +335,7 @@ class MainApp(QMainWindow):
 
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Mixed Signal")
         time_step = self.signalData[1, 0] - self.signalData[0, 0]
-        self.plot_frequency_domain(mixed_signal, noisy_signal, time_step)
+        self.plot_frequency_domain(mixed_signal, time_step)
 
     def update_table_mixed_signal(self, row, amplitude, frequency,signal_type):
         old_signal = remove_elements(self.signalData, self.old_amplitude, self.old_frequency, self.old_type)
@@ -394,18 +382,18 @@ class MainApp(QMainWindow):
         
         # Update frequency domain plot
         time_step = self.signalData[1, 0] - self.signalData[0, 0]
-        self.plot_frequency_domain(old_signal, noisy_signal, time_step)
+        self.plot_frequency_domain(old_signal, time_step)
 
     def clearAll(self):
         self.originalSignal.clear()
         self.reconstructedSignal.clear()
         self.diffrenceGraph.clear()
         self.frequencyDomain.clear()
-        # self.composer.clear_table()
+        self.composer.clear_table()
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
 
 if __name__ == "__main__":
-    csv_file_path = 'signals_data/ECG_Abnormal.csv'
+    csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Abnormal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
