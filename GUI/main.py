@@ -154,18 +154,31 @@ class MainApp(QMainWindow):
         if not self.snr_enabled: 
             return
       
-        if self.mixedSignalData is not None:
-            x = self.mixedSignalData[:, 0]
-            y = self.mixedSignalData[:, 1]
-        else:
-            x = self.signalData[:, 0]
-            y = self.signalData[:, 1]
-
+        # if self.mixedSignalData is not None:
+        #     x = self.mixedSignalData[:, 0]
+        #     y = self.mixedSignalData[:, 1]
+        # else:
+        x = self.signalData[:, 0]
+        y = self.signalData[:, 1]
+        self.sampledTime, self.sampledSignal, self.reconstructedSignalData = sample_and_reconstruct(
+            self.signalData[:, 0], self.signalData[:, 1], self.sampling_rate, self.interp_method)
+        reconstructed_signal = self.reconstructedSignalData
         noisy_signal = add_noise(y, snr_value)
-        
+        noisy_signal_reconstructed= add_noise(reconstructed_signal, snr_value)
         self.originalSignal.clear()
         self.originalSignal.plot(x, y, pen=mkPen(color="b", width=2), name="Original or Mixed Signal")
         self.originalSignal.plot(x, noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal")
+        self.reconstructedSignal.plot(x, y, pen=mkPen(color="b", width=2), name="Original Signal")
+
+        self.reconstructedSignal.plot(x, noisy_signal_reconstructed, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Signal")
+        self.diffrenceGraph.clear()
+        # # if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.ndim == 1:
+        difference = self.calculate_difference(y, reconstructed_signal)
+        self.diffrenceGraph.plot(x, difference, pen=mkPen(color="b", width=2),
+                                 name="Difference")
+        noise_difference = self.calculate_difference(noisy_signal, noisy_signal_reconstructed)
+        self.diffrenceGraph.plot(x, noise_difference, pen=mkPen(color="r", width=2),
+                                 name="Difference")
 
         self.plot_frequency_domain(y, noisy_signal, x[1] - x[0])
 
@@ -217,6 +230,10 @@ class MainApp(QMainWindow):
 
         self.reconstructedSignal.clear()
         self.reconstructedSignal.plot(x, y, pen=mkPen(color="b", width=2), name="Original Signal")
+        if self.snr_enabled:
+            noisy_signal = add_noise(y, snr_value)
+            self.reconstructedSignal.plot(x, noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine),
+                                     name="Noisy Signal")
 
         print("Signal Data Updated:")
         print(self.signalData)
@@ -354,7 +371,7 @@ class MainApp(QMainWindow):
 
 
 if __name__ == "__main__":
-    csv_file_path = '../signals_data/ECG_Abnormal.csv'
+    csv_file_path = 'signals_data/ECG_Abnormal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
