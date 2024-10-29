@@ -13,7 +13,7 @@ from Core.noise import add_noise
 from Core.mainCore import sample_and_reconstruct, sinc_interp,linear_interp, calculate_max_frequency,zoh_reconstruction,cubic_spline_interp
 
 class MainApp(QMainWindow):
-    def __init__(self,csv_file_path):
+    def __init__(self, csv_file_path):
         super().__init__()
 
         self.old_amplitude = None
@@ -144,6 +144,31 @@ class MainApp(QMainWindow):
         self.diffrenceGraph.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.diffrenceGraph))
         self.frequencyDomain.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.frequencyDomain))
 
+        #link panning 
+        self.originalSignal.sigXRangeChanged.connect(self.sync_pan)
+        self.reconstructedSignal.sigXRangeChanged.connect(self.sync_pan)
+        self.diffrenceGraph.sigXRangeChanged.connect(self.sync_pan)
+
+        self.is_panning = False
+
+    def sync_pan(self, plot_widget):
+  
+        if self.is_panning:
+            return
+
+        self.is_panning = True  
+        x_min, x_max = plot_widget.viewRange()[0]
+
+  
+        if plot_widget != self.originalSignal:
+            self.originalSignal.setXRange(x_min, x_max, padding=0)
+        if plot_widget != self.reconstructedSignal:
+            self.reconstructedSignal.setXRange(x_min, x_max, padding=0)
+        if plot_widget != self.diffrenceGraph:
+            self.diffrenceGraph.setXRange(x_min, x_max, padding=0)
+
+        self.is_panning = False  
+        
     def limit_x_axis(self, plot_widget):
         x_min, x_max = plot_widget.viewRange()[0]
         if x_min < 0:
@@ -246,7 +271,7 @@ class MainApp(QMainWindow):
                 self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2),
                                          name="Difference")
                 meanSquareError = np.mean(difference ** 2)
-                meanSquareError_text = f"MSE: {meanSquareError:.4f}"
+                meanSquareError_text = f"Error: {meanSquareError:.4f}"
 
                 meanSquareError_item = TextItem(meanSquareError_text, anchor=(0, 1), color='w')
 
@@ -393,9 +418,10 @@ class MainApp(QMainWindow):
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
 
 if __name__ == "__main__":
-    csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Abnormal.csv'
+    csv_file_path = 'signals_data/ECG_Abnormal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
     sys.exit(app.exec_())
+
 

@@ -64,6 +64,19 @@ buttonStyle = """
         border-color: #174082;
     }
 """
+deleteButtonStyle="""
+    QPushButton {
+        background: #F2F7FF;  
+        border: none;             
+        outline: none;           
+    }
+    QPushButton:hover {
+        background: transparent;  
+    }
+    QPushButton:pressed {
+        background: transparent;  
+    }
+"""
 
 tableStyle = """
     QTableWidget {

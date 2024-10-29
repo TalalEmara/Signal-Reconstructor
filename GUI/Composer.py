@@ -1,9 +1,9 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QDoubleSpinBox, QTableWidget, QVBoxLayout, QHBoxLayout, \
     QPushButton, QHeaderView,QTableWidgetItem, QMessageBox
-from PyQt5.QtCore import Qt, pyqtSignal
-from Styles.ComposerStyling import composerTitleStyle, comboBoxStyle, doubleSpinBoxStyle, buttonStyle, tableStyle
-
+from PyQt5.QtCore import Qt, pyqtSignal,QSize
+from Styles.ComposerStyling import composerTitleStyle, comboBoxStyle, doubleSpinBoxStyle, buttonStyle, tableStyle,deleteButtonStyle
+from PyQt5.QtGui import QIcon
 
 class Composer(QWidget):
     valueAdded = pyqtSignal(float, float,str)
@@ -92,7 +92,11 @@ class Composer(QWidget):
         self.componentsTable.setItem(row, 1, QTableWidgetItem(str(amplitude)))
         self.componentsTable.setItem(row, 2, QTableWidgetItem(str(frequency)))
 
-        delete_button = QPushButton("Delete")
+        delete_button = QPushButton()  # Create a button without a text label
+        delete_button.setIcon(QIcon("GUI/Styles/Icons/delete3.png"))
+        delete_button.setIconSize(QSize(20, 20))
+        delete_button.setStyleSheet(deleteButtonStyle)
+        delete_button.setFixedSize(30, 30)  # Set a fixed size for the button
         button_widget = QWidget()
         button_layout = QHBoxLayout(button_widget)
         button_layout.addWidget(delete_button)
