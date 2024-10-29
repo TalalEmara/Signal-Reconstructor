@@ -77,7 +77,8 @@ class ToolBar(QWidget):
 
 
         self.samplingSlider = QSlider(Qt.Horizontal)
-        self.samplingSlider.setRange(0, 400)
+        self.samplingSlider.setValue(int(200/self.signalfMax))
+        self.samplingSlider.setRange(int(200/self.signalfMax), 400)
         self.samplingSlider.setSingleStep(1)
         self.samplingSlider.setStyleSheet(sliderOnStyle)
 

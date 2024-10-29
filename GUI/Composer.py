@@ -150,7 +150,8 @@ class Composer(QWidget):
                     delete_button, amplitude=amplitude, frequency=frequency, signal_type=signal_type
                 ))
 
-
+    def clear_table(self):
+        self.componentsTable.setRowCount(0)
          
     # def handle_table_edit(self, row, column):
     #     try:
