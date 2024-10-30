@@ -93,7 +93,7 @@ class Composer(QWidget):
         self.componentsTable.setItem(row, 2, QTableWidgetItem(str(frequency)))
 
         delete_button = QPushButton()  # Create a button without a text label
-        delete_button.setIcon(QIcon("GUI/Styles/Icons/delete3.png"))
+        delete_button.setIcon(QIcon("Signal-Reconstructor/GUI/Styles/Icons/delete.png"))
         delete_button.setIconSize(QSize(20, 20))
         delete_button.setStyleSheet(deleteButtonStyle)
         delete_button.setFixedSize(30, 30)  # Set a fixed size for the button

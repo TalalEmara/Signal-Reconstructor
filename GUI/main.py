@@ -375,7 +375,7 @@ class MainApp(QMainWindow):
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.DashLine), name="Noisy Updated Signal")
 
     def remove_element(self, amplitude, frequency, signal_type):
-        # Remove the specified elements from the signal data
+        # Remove the specified elements from the signal data  
         old_signal = remove_elements(self.signalData, amplitude, frequency, signal_type)
         
         # Update the signalData with the modified signal
