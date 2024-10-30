@@ -408,7 +408,6 @@ class MainApp(QMainWindow):
         self.frequencyDomain.clear()
         self.composer.clear_table()
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
-        self.signalData = np.zeros((1000,2))
 
 if __name__ == "__main__":
     csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Normal.csv'
