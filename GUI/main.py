@@ -142,7 +142,7 @@ class MainApp(QMainWindow):
         self.originalSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.originalSignal))
         self.reconstructedSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.reconstructedSignal))
         self.diffrenceGraph.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.diffrenceGraph))
-        self.frequencyDomain.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.frequencyDomain))
+        # self.frequencyDomain.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.frequencyDomain))
 
         #link panning 
         self.originalSignal.sigXRangeChanged.connect(self.sync_pan)
@@ -279,7 +279,7 @@ class MainApp(QMainWindow):
 
             self.plot_frequency_domain(amplitude, self.signalData[1, 0] - self.signalData[0, 0])
 
-            self.add_frequency_domain =(reconstructed_amplitude, self.signalData[1, 0] - self.signalData[0, 0])
+            # self.add_frequency_domain =(reconstructed_amplitude, self.signalData[1, 0] - self.signalData[0, 0])
             # print(np.dim(y))
 
 
@@ -410,7 +410,7 @@ class MainApp(QMainWindow):
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
 
 if __name__ == "__main__":
-    csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Normal.csv'
+    csv_file_path = 'signals_data/ECG_Normal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
