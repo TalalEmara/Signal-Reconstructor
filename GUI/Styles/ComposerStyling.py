@@ -2,7 +2,7 @@
 composerTitleStyle = """
     QLabel#composerTitle {
         font-family: "Samsung Sans";
-        font-size: 18px;
+        font-size: 30px;
         font-weight: 600;
         color: #2252A0;
         padding: 5px 0;
@@ -64,19 +64,20 @@ buttonStyle = """
         border-color: #174082;
     }
 """
-deleteButtonStyle="""
+deleteButtonStyle = """
     QPushButton {
-        background-color: None;  
-        border: none;             
+        background-color: white;  
+        border-color: white;            
         outline: none;           
     }
     QPushButton:hover {
-        background-color: None;  
+        background-color: #E3EEFF;  
     }
     QPushButton:pressed {
-        background-color: None;  
+        background-color: #D0DAF0;  
     }
 """
+
 
 tableStyle = """
     QTableWidget {
