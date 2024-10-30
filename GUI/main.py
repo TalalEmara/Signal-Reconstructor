@@ -117,15 +117,15 @@ class MainApp(QMainWindow):
         # self.comparisonLayout.addLayout(self.diffrenceGraphLayout)
         # self.comparisonLayout.addLayout(self.frequencyDomainLayout)
 
-        self.graphsLayout.addLayout(self.originalSignalLayout,35)
-        self.graphsLayout.addLayout(self.reconstructedSignalLayout,35)
-        self.graphsLayout.addLayout(self.comparisonLayout,30)
+        self.graphsLayout.addLayout(self.originalSignalLayout,30)
+        self.graphsLayout.addLayout(self.reconstructedSignalLayout,30)
+        self.graphsLayout.addLayout(self.comparisonLayout,40)
 
         self.workspace.addLayout(self.controlBarLayout,5)
         self.workspace.addLayout(self.graphsLayout,95)
 
-        self.mainLayout.addLayout(self.workspace,80)
-        self.mainLayout.addLayout(self.composerLayout,20)
+        self.mainLayout.addLayout(self.workspace,85)
+        self.mainLayout.addLayout(self.composerLayout,15)
 
         self.controlBarLayout.addWidget(self.controlBar)
         self.composerLayout.addWidget(self.composer)
@@ -134,7 +134,7 @@ class MainApp(QMainWindow):
         self.diffrenceGraphLayout.addWidget(self.diffrenceGraph)
         self.frequencyDomainLayout.addWidget(self.frequencyDomain)
 
-        self.splitter = QSplitter(Qt.Horizontal)
+        self.splitter = QSplitter(Qt.Vertical)
         self.splitter.addWidget(self.diffrenceGraph)
         self.splitter.addWidget(self.frequencyDomain)
         self.comparisonLayout.addWidget(self.splitter)
@@ -339,7 +339,7 @@ class MainApp(QMainWindow):
         self.frequencyDomain.plot(original_positive_frequencies, original_magnitudes, pen=mkPen(color="#a000c8", width=2), name="Original Signal Frequency Domain")
         self.frequencyDomain.plot(-1*original_positive_frequencies, original_magnitudes, pen=mkPen(color="#a000c8", width=2))
 
-        self.frequencyDomain.plot(-self.sampling_rate + original_positive_frequencies, original_magnitudes, pen=mkPen(color="b", width=2),name="Reconstructed Signal Frequency Domain" )
+        self.frequencyDomain.plot(-self.sampling_rate + original_positive_frequencies, original_magnitudes, pen=mkPen(color="b", width=2),name=" Signals due to periodicity" )
         self.frequencyDomain.plot(self.sampling_rate +  original_positive_frequencies, original_magnitudes, pen=mkPen(color="b", width=2), )
         self.frequencyDomain.plot(-1*original_positive_frequencies - self.sampling_rate, original_magnitudes, pen=mkPen(color="b", width=2), )
         self.frequencyDomain.plot(-1*original_positive_frequencies + self.sampling_rate, original_magnitudes, pen=mkPen(color="b", width=2), )
@@ -417,26 +417,27 @@ class MainApp(QMainWindow):
         # Update frequency domain plot
         time_step = self.signalData[1, 0] - self.signalData[0, 0]
         self.plot_frequency_domain(old_signal, time_step)
-
-        if num_rows == 0:
+        if not num_rows:
             self.originalSignal.clear()
             self.reconstructedSignal.clear()
             self.diffrenceGraph.clear()
             self.frequencyDomain.clear()
-
+            if self.data_loader:
+                self.updateSignalData(self.signalData)
 
     def clearAll(self):
         self.originalSignal.clear()
         self.signalData[:,1] *= 0
-        print(self.signalData)
+        # print(self.signalData)
         self.reconstructedSignal.clear()
         self.diffrenceGraph.clear()
         self.frequencyDomain.clear()
         self.composer.clear_table()
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
-
+        self.data_loader = None
+                
 if __name__ == "__main__":
-    csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Normal.csv'
+    csv_file_path = 'signals_data/ECG_Normal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
