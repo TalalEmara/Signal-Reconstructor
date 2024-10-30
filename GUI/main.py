@@ -29,16 +29,13 @@ class MainApp(QMainWindow):
         }
         self.interp_method = self.interp_methods["Whittaker-Shannon (sinc)"]
 
-        # self.signalData = self.generate_default_data()
-        self.data_loader = DataLoader(csv_file_path)  # Load data from CSV
+       
+        self.data_loader = DataLoader(csv_file_path) 
         self.signalData = self.data_loader.get_data()
         self.signalfMax = calculate_max_frequency(self.signalData[:, 1],self.signalData[:, 0])
         print(f"max frequency: {self.signalfMax}")
 
         self.sampling_rate = 5
-
-        # self.reconstructedSignalData = self.generate_default_data()
-
 
         self.mixedSignalData = None  
         self.reconstructedSignalData = self.signalData
@@ -177,10 +174,18 @@ class MainApp(QMainWindow):
         self.is_panning = False  
         
     def limit_x_axis(self, plot_widget):
-        x_min, x_max = plot_widget.viewRange()[0]
-        if x_min < 0:
-            plot_widget.setXRange(0, x_max, padding=0)
-    
+        time_min, time_max = plot_widget.viewRange()[0]
+
+        if time_min < 0:
+            time_min = 0
+
+        time_end = self.signalData[-1, 0]
+
+        if time_max > time_end:
+            time_max = time_end
+
+        plot_widget.setXRange(time_min, time_max, padding=0)
+
     def set_snr_enabled(self, enabled):
         self.snr_enabled = enabled
         self.updateSignalData(self.signalData)
@@ -347,13 +352,19 @@ class MainApp(QMainWindow):
         self.frequencyDomain.plot(-1*original_positive_frequencies - self.sampling_rate, original_magnitudes, pen=mkPen(color="b", width=2), )
         self.frequencyDomain.plot(-1*original_positive_frequencies + self.sampling_rate, original_magnitudes, pen=mkPen(color="b", width=2), )
 
-        self.frequencyDomain.setXRange(0, np.max(original_positive_frequencies) * 1.1, padding=0.05)
-        self.frequencyDomain.setYRange(0, np.max(original_magnitudes) * 1.1, padding=0.05)
-        max_frequency = np.max(original_positive_frequencies) + self.sampling_rate
+        max_frequency = np.max(original_positive_frequencies) * 0.5 
         max_magnitude = np.max(original_magnitudes)
-
-        self.frequencyDomain.setXRange(-max_frequency * 1.1, max_frequency * 1.1, padding=0.05)
+        self.frequencyDomain.setXRange(-max_frequency, max_frequency, padding=0)
         self.frequencyDomain.setYRange(0, max_magnitude * 1.1, padding=0.05)
+
+        # max_frequency = np.max(original_positive_frequencies) + self.sampling_rate
+        # max_magnitude = np.max(original_magnitudes)
+
+
+        # self.frequencyDomain.setXRange(-max_frequency * 1.1, max_frequency * 1.1, padding=0.05)
+        # self.frequencyDomain.setYRange(0, max_magnitude * 1.1, padding=0.05)
+
+       
 
     def add_mixed_signal(self, amplitude, frequency, signal_type):
         self.old_amplitude = amplitude
@@ -361,7 +372,7 @@ class MainApp(QMainWindow):
         self.old_type = signal_type
 
         mixed_signal = mixer(self.signalData, amplitude, frequency,signal_type)
-        # print(self.signalData[:, 1])
+       
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal)) 
         self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
                                         symbolBrush='w')
@@ -395,29 +406,19 @@ class MainApp(QMainWindow):
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="#a000c8", width=2), name="Noisy Updated Signal")
 
     def remove_element(self, amplitude, frequency, signal_type, num_rows):
-        # Remove the specified elements from the signal data
         old_signal = remove_elements(self.signalData, amplitude, frequency, signal_type)
         
-        # Update the signalData with the modified signal
         self.signalData = np.column_stack((self.signalData[:, 0], old_signal))
 
-        # Clear the previous plot
         self.originalSignal.clear()
         
-        # Plot the updated mixed signal
         self.originalSignal.plot(self.signalData[:, 0], old_signal, pen=mkPen(color="#a000c8", width=2), name="Updated Mixed Signal After Removal")
-        
         self.updateSignalData(self.signalData)
-
-
-        # Get the current SNR value and add noise if enabled
         snr_value = self.controlBar.snrSlider.value()
         noisy_signal = add_noise(old_signal, snr_value) if self.snr_enabled else old_signal
-        
-        # Plot the noisy version of the updated signal
+
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="#a000c8", width=2), name="Noisy Updated Signal After Removal")
-        
-        # Update frequency domain plot
+
         time_step = self.signalData[1, 0] - self.signalData[0, 0]
         self.plot_frequency_domain(old_signal, time_step)
         if not num_rows:
@@ -431,7 +432,6 @@ class MainApp(QMainWindow):
     def clearAll(self):
         self.originalSignal.clear()
         self.signalData[:,1] *= 0
-        # print(self.signalData)
         self.reconstructedSignal.clear()
         self.diffrenceGraph.clear()
         self.frequencyDomain.clear()
