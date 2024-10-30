@@ -418,7 +418,7 @@ class MainApp(QMainWindow):
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
 
 if __name__ == "__main__":
-    csv_file_path = 'signals_data/ECG_Abnormal.csv'
+    csv_file_path = 'signals_data/EEG_Abnormal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
