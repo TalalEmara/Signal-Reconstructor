@@ -25,7 +25,6 @@ def mixer(signal, amp, freq, signal_type = 'sin'):
         raise ValueError("Unsupported signal type")
 
     # save_data({'amplitude': amp, 'frequency': freq, 'type': type}) #interrupting the addition
-
     return signal[:, 1] + mixed_component
 
 def remove_elements(signal, amp, freq, signal_type = 'sin'):
@@ -43,6 +42,7 @@ def remove_elements(signal, amp, freq, signal_type = 'sin'):
         mixed_component = amp * (2 * np.abs((dummy_time * freq) % 1 - 0.5) - 1)
     else:
         raise ValueError("Unsupported signal type")
+    print(signal[:, 1] - mixed_component)
 
     return signal[:, 1] - mixed_component
 

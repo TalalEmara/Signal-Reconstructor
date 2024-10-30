@@ -205,7 +205,7 @@ class MainApp(QMainWindow):
         self.reconstructedSignal.clear()
 
         self.reconstructedSignal.plot(time, noisy_signal_reconstructed, pen=mkPen(color="b", width=2), name="Original Signal")
-        # self.reconstructedSignal.plot(time, noisy_signal_reconstructed, pen=mkPen(color="r", width=1, style=Qt.Line), name="Noisy Signal")
+        # self.reconstructedSignal.plot(time, noisy_signal_reconstructed, pen=mkPen(color="r", width=2), name="Noisy Signal")
 
         self.diffrenceGraph.clear()
         # # if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.ndim == 1:
@@ -254,7 +254,7 @@ class MainApp(QMainWindow):
             self.reconstructedSignal.clear()
             if self.snr_enabled:
                 amplitude = add_noise(amplitude, snr_value)
-                # self.originalSignal.plot(time, noisy_signal, pen=mkPen(color="r", width=1, style=Qt.Line), name="Noisy Signal")
+                # self.originalSignal.plot(time, noisy_signal, pen=mkPen(color="r", width=2), name="Noisy Signal")
                 self.sampledTime, self.sampledSignal, reconstructed_amplitude = sample_and_reconstruct(
                     time, amplitude, self.sampling_rate, self.interp_method)
                 self.originalSignal.plot(time, amplitude, pen=mkPen(color="#a000c8", width=2), name="Original Signal")
@@ -367,7 +367,7 @@ class MainApp(QMainWindow):
         snr_value = self.controlBar.snrSlider.value()
         noisy_signal = add_noise(mixed_signal, snr_value) if self.snr_enabled else mixed_signal
 
-        self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=1, style=Qt.Line), name="Noisy Mixed Signal")
+        self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=2), name="Noisy Mixed Signal")
         time_step = self.signalData[1, 0] - self.signalData[0, 0]
         self.plot_frequency_domain(mixed_signal, time_step)
 
@@ -389,9 +389,9 @@ class MainApp(QMainWindow):
 
         snr_value = self.controlBar.snrSlider.value()
         noisy_signal = add_noise(updated_signal, snr_value) if self.snr_enabled else updated_signal
-        self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="#a000c8", width=1, style=Qt.Line), name="Noisy Updated Signal")
+        self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="#a000c8", width=2), name="Noisy Updated Signal")
 
-    def remove_element(self, amplitude, frequency, signal_type):
+    def remove_element(self, amplitude, frequency, signal_type, num_rows):
         # Remove the specified elements from the signal data
         old_signal = remove_elements(self.signalData, amplitude, frequency, signal_type)
         
@@ -412,15 +412,23 @@ class MainApp(QMainWindow):
         noisy_signal = add_noise(old_signal, snr_value) if self.snr_enabled else old_signal
         
         # Plot the noisy version of the updated signal
-        self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="#a000c8", width=1, style=Qt.Line), name="Noisy Updated Signal After Removal")
+        self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="#a000c8", width=2), name="Noisy Updated Signal After Removal")
         
         # Update frequency domain plot
         time_step = self.signalData[1, 0] - self.signalData[0, 0]
         self.plot_frequency_domain(old_signal, time_step)
 
+        if num_rows == 0:
+            self.originalSignal.clear()
+            self.reconstructedSignal.clear()
+            self.diffrenceGraph.clear()
+            self.frequencyDomain.clear()
+
+
     def clearAll(self):
         self.originalSignal.clear()
-        # self.signalData*=0
+        self.signalData[:,1] *= 0
+        print(self.signalData)
         self.reconstructedSignal.clear()
         self.diffrenceGraph.clear()
         self.frequencyDomain.clear()
@@ -428,7 +436,7 @@ class MainApp(QMainWindow):
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
 
 if __name__ == "__main__":
-    csv_file_path = 'signals_data/ECG_Normal.csv'
+    csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Normal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()

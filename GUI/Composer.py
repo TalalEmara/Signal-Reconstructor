@@ -8,7 +8,7 @@ from PyQt5.QtGui import QIcon
 class Composer(QWidget):
     valueAdded = pyqtSignal(float, float,str)
     valueUpdated = pyqtSignal(int, float, float, str)
-    valueRemoved = pyqtSignal(float, float, str)
+    valueRemoved = pyqtSignal(float, float, str, int)
     
     def __init__(self):
         super().__init__()
@@ -121,8 +121,9 @@ class Composer(QWidget):
 
     def remove_from_table(self, row, amplitude, frequency, signal_type):
         # Additional code to handle removal logic here
-        self.valueRemoved.emit(amplitude, frequency, signal_type)
         self.componentsTable.removeRow(row)
+        self.valueRemoved.emit(amplitude, frequency, signal_type, self.componentsTable.rowCount())
+
         print(f"Row {row} removed with amplitude={amplitude}, frequency={frequency}, signal_type={signal_type}")            
 
     def handle_table_edit(self, row, column):
