@@ -110,7 +110,7 @@ class ToolBar(QWidget):
         self.rowLayout.addStretch(1)
         self.rowLayout.addWidget(self.samplingMethodLabel,1)
         self.rowLayout.addWidget(self.samplingMethod,15)
-        self.rowLayout.addStretch(1)
+        self.rowLayout.addStretch(3)
         self.rowLayout.addWidget(self.samplingRateLabel,1)
         self.rowLayout.addWidget(self.samplingSlider,25)
         self.rowLayout.addWidget(self.normSamplingRateInput,5)

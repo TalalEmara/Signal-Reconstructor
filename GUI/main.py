@@ -215,8 +215,11 @@ class MainApp(QMainWindow):
         noise_difference = self.calculate_difference(noisy_signal, noisy_signal_reconstructed)
         self.diffrenceGraph.plot(time, noise_difference, pen=mkPen(color="r", width=2),
                                  name="Difference")
-        self.plot_frequency_domain(self.reconstructedSignal, time[1] - time[0])
-        self.add_frequency_domain = (noisy_signal_reconstructed, self.signalData[1, 0] - self.signalData[0, 0])
+        time_step = time[1] - time[0]
+        self.frequencyDomain.clear()  # Clear previous frequency plot
+        self.plot_frequency_domain(noisy_signal, time_step)
+       
+        
 
     def generate_default_data(self): #testing
         time = np.linspace(0, 1, 1000)
