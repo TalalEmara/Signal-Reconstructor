@@ -128,15 +128,8 @@ class Composer(QWidget):
     def handle_table_edit(self, row, column):
         signal_type = self.componentsTable.item(row, 0).text()
 
-        if self.componentsTable.item(row, 1):
-            amplitude = float(self.componentsTable.item(row, 1).text())
-        else:
-            amplitude = amplitude
-
-        if self.componentsTable.item(row, 2):
-            frequency = float(self.componentsTable.item(row, 2).text())
-        else:
-            frequency = frequency
+        amplitude = float(self.componentsTable.item(row, 1).text())
+        frequency = float(self.componentsTable.item(row, 2).text())
                 
         self.valueUpdated.emit(row, amplitude, frequency, signal_type)
 

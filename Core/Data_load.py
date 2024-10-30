@@ -23,7 +23,7 @@ class DataLoader:
             # Convert data to numeric, coercing errors to NaN
             self.data = self.data.apply(pd.to_numeric, errors='coerce')
 
-            print("Data loaded successfully.")
+            # print("Data loaded successfully.")
             # print(self.data.head())  # Print first few rows of the loaded data for verification
         except FileNotFoundError:
             print(f"Error: The file {self.file_path} was not found.")

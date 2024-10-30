@@ -217,8 +217,8 @@ class MainApp(QMainWindow):
 
     def updateSamplingRate(self, samplingRate):
         self.sampling_rate = int(samplingRate)
-        print(samplingRate)
-        print(self.sampling_rate)
+        # print(samplingRate)
+        # print(self.sampling_rate)
         try:
             self.updateSignalData(self.signalData)
         except Exception as e:
@@ -228,14 +228,14 @@ class MainApp(QMainWindow):
     def updateSamplingMethod(self, method):
         print(method)
         self.interp_method = self.interp_methods[method]
-        print(self.interp_method)
+        # print(self.interp_method)
         self.updateSignalData(self.signalData)
 
     def updateSignalData(self, data):
         self.signalData = np.array(data)
         snr_value = self.controlBar.snrSlider.value()
         
-        print("data")
+        # print("data")
         if self.signalData.shape[1] >= 2:
             time = self.signalData[:, 0]
             amplitude = self.signalData[:, 1]
@@ -260,8 +260,8 @@ class MainApp(QMainWindow):
             self.reconstructedSignal.plot(time, reconstructed_amplitude, pen=mkPen(color="b", width=2),
                                           name="Reconstructed Signal")
 
-            print("Signal Data Updated:")
-            print(self.signalData)
+            # print("Signal Data Updated:")
+            # print(self.signalData)
             self.diffrenceGraph.clear()
             if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.ndim == 1:
                 difference = self.calculate_difference(self.signalData[:, 1], reconstructed_amplitude)
@@ -408,6 +408,7 @@ class MainApp(QMainWindow):
         self.frequencyDomain.clear()
         self.composer.clear_table()
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
+        self.signalData = np.zeros((1000,2))
 
 if __name__ == "__main__":
     csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Normal.csv'
