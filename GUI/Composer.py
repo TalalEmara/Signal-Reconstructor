@@ -93,7 +93,7 @@ class Composer(QWidget):
         self.componentsTable.setItem(row, 2, QTableWidgetItem(str(frequency)))
 
         delete_button = QPushButton()  # Create a button without a text label
-        delete_button.setIcon(QIcon("Signal-Reconstructor/GUI/Styles/Icons/delete.png"))
+        delete_button.setIcon(QIcon("GUI/Styles/Icons/delete3.png"))
         delete_button.setIconSize(QSize(20, 20))
         delete_button.setStyleSheet(deleteButtonStyle)
         delete_button.setFixedSize(30, 30)  # Set a fixed size for the button
@@ -128,8 +128,15 @@ class Composer(QWidget):
     def handle_table_edit(self, row, column):
         signal_type = self.componentsTable.item(row, 0).text()
 
-        amplitude = float(self.componentsTable.item(row, 1).text())
-        frequency = float(self.componentsTable.item(row, 2).text())
+        if self.componentsTable.item(row, 1):
+            amplitude = float(self.componentsTable.item(row, 1).text())
+        else:
+            amplitude = amplitude
+
+        if self.componentsTable.item(row, 2):
+            frequency = float(self.componentsTable.item(row, 2).text())
+        else:
+            frequency = frequency
                 
         self.valueUpdated.emit(row, amplitude, frequency, signal_type)
 
