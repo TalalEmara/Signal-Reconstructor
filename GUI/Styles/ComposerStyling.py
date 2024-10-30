@@ -66,15 +66,15 @@ buttonStyle = """
 """
 deleteButtonStyle="""
     QPushButton {
-        background: #F2F7FF;  
+        background-color: None;  
         border: none;             
         outline: none;           
     }
     QPushButton:hover {
-        background: transparent;  
+        background-color: None;  
     }
     QPushButton:pressed {
-        background: transparent;  
+        background-color: None;  
     }
 """
 
@@ -141,4 +141,10 @@ tableStyle = """
     QScrollBar::handle:vertical:hover {
         background: #1A5EB8;  
     }
+
+    QTableWidget::item:nth-column(3) {
+            background-color: none;
+            border: none;
+            
+        }
 """
