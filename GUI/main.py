@@ -234,6 +234,7 @@ class MainApp(QMainWindow):
         self.interp_method = self.interp_methods[method]
         print(self.interp_method)
         self.updateSignalData(self.signalData)
+
     def updateSignalData(self, data):
         self.signalData = np.array(data)
         snr_value = self.controlBar.snrSlider.value()
@@ -346,13 +347,8 @@ class MainApp(QMainWindow):
         mixed_signal = mixer(self.signalData, amplitude, frequency,signal_type)
         # print(self.signalData[:, 1])
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal)) 
-        # print(self.signalData[:, 1])
-
-
-        # self.originalSignal.clear()
-        # self.originalSignal.plot(self.signalData[:, 0], mixed_signal, pen=mkPen(color="b", width=2), name="Mixed Signal")
-        combined_signal = np.column_stack((self.signalData[:, 0], mixed_signal))
-
+        self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=8,
+                                        symbolBrush='g')
         self.updateSignalData(self.signalData)
 
         snr_value = self.controlBar.snrSlider.value()
@@ -418,7 +414,7 @@ class MainApp(QMainWindow):
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
 
 if __name__ == "__main__":
-    csv_file_path = 'signals_data/EEG_Abnormal.csv'
+    csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Normal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
