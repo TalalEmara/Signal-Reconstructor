@@ -39,9 +39,6 @@ class ToolBar(QWidget):
         self.clearButton = QPushButton("clear")
         self.clearButton.setStyleSheet(buttonWhiteStyle)
 
-
-
-
         self.snrEnable = QCheckBox("SNR: ")
         self.snrEnable.setStyleSheet(labelOffStyle)
         self.snrSlider = QSlider(Qt.Horizontal)

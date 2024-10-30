@@ -156,13 +156,3 @@ class Composer(QWidget):
 
     def clear_table(self):
         self.componentsTable.setRowCount(0)
-         
-    # def handle_table_edit(self, row, column):
-    #     try:
-    #         signal_type = self.componentsTable.item(row, 0).text()
-    #         amplitude = float(self.componentsTable.item(row, 1).text())
-    #         frequency = float(self.componentsTable.item(row, 2).text())
-    #         self.valueUpdated.emit(row, amplitude, frequency, signal_type)
-    #     except ValueError:
-            
-    #         pass

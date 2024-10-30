@@ -11,16 +11,16 @@ from scipy.signal import square
 def mixer(signal, amp, freq, signal_type = 'sin'):
     sampling_rate = len(signal[:, 1])  # samples per second
     duration = 1.0  # seconds
-    t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
+    dummy_time = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
 
     if signal_type == 'sin':
-        mixed_component = amp * np.sin(2 * np.pi * freq * t)
+        mixed_component = amp * np.sin(2 * np.pi * freq * dummy_time)
     elif signal_type == 'cos':
-        mixed_component = amp * np.cos(2 * np.pi * freq * t)
+        mixed_component = amp * np.cos(2 * np.pi * freq * dummy_time)
     elif signal_type == 'square':
-        mixed_component = amp * square(2 * np.pi * freq * t)
+        mixed_component = amp * square(2 * np.pi * freq * dummy_time)
     elif signal_type == "triangular":
-        mixed_component = amp * (2 * np.abs((t * freq) % 1 - 0.5) - 1)
+        mixed_component = amp * (2 * np.abs((dummy_time * freq) % 1 - 0.5) - 1)
     else:
         raise ValueError("Unsupported signal type")
 
@@ -31,16 +31,16 @@ def mixer(signal, amp, freq, signal_type = 'sin'):
 def remove_elements(signal, amp, freq, signal_type = 'sin'):
     sampling_rate = len(signal[:, 1])  # samples per second
     duration = 1.0  # seconds
-    t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
+    dummy_time = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
 
     if signal_type == 'sin':
-        mixed_component = amp * np.sin(2 * np.pi * freq * t)
+        mixed_component = amp * np.sin(2 * np.pi * freq * dummy_time)
     elif signal_type == 'cos':
-        mixed_component = amp * np.cos(2 * np.pi * freq * t)
+        mixed_component = amp * np.cos(2 * np.pi * freq * dummy_time)
     elif signal_type == 'square':
-        mixed_component = amp * square(2 * np.pi * freq * t)
+        mixed_component = amp * square(2 * np.pi * freq * dummy_time)
     elif signal_type == "triangular":
-        mixed_component = amp * (2 * np.abs((t * freq) % 1 - 0.5) - 1)
+        mixed_component = amp * (2 * np.abs((dummy_time * freq) % 1 - 0.5) - 1)
     else:
         raise ValueError("Unsupported signal type")
 

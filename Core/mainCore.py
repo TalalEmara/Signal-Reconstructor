@@ -39,8 +39,8 @@ class DataLoader:
 
 
 def sinc_interp(sample_points, sample_values, interpolated_points):
-    T = sample_points[1] - sample_points[0] + 1e-9
-    return np.array([np.sum(sample_values * np.sinc((t_i - sample_points) / T)) for t_i in interpolated_points])
+    time_diff = sample_points[1] - sample_points[0] + 1e-9
+    return np.array([np.sum(sample_values * np.sinc((t_i - sample_points) / time_diff)) for t_i in interpolated_points])
 
 def linear_interp(sample_points, sample_values, interpolated_points):
     return np.interp(interpolated_points, sample_points, sample_values)

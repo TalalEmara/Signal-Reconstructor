@@ -36,66 +36,66 @@ class DataLoader:
 
 
 
-class DataPlotter:
-    """Class to plot data using Matplotlib."""
+# class DataPlotter:
+#     """Class to plot data using Matplotlib."""
 
-    def __init__(self, data):
-        """Initialize with the data to be plotted."""
-        self.data = data
+#     def __init__(self, data):
+#         """Initialize with the data to be plotted."""
+#         self.data = data
 
-    def plot(self, x_index, y_index, title='Signal Plot', x_label='Time', y_label='Amplitude'):
-        """Plot the signal using specified column indices."""
-        if self.data is not None:
-            plt.figure(figsize=(12, 6))  # Wider figure
+#     def plot(self, x_index, y_index, title='Signal Plot', x_label='Time', y_label='Amplitude'):
+#         """Plot the signal using specified column indices."""
+#         if self.data is not None:
+#             plt.figure(figsize=(12, 6))  # Wider figure
 
-            # Create time axis (x_index can be either time or sample index)
-            x_data = self.data.iloc[:, x_index]
-            y_data = self.data.iloc[:, y_index]
+#             # Create time axis (x_index can be either time or sample index)
+#             x_data = self.data.iloc[:, x_index]
+#             y_data = self.data.iloc[:, y_index]
 
-            # Plot the data as a signal
-            plt.plot(x_data, y_data, color='blue', linewidth=1)
+#             # Plot the data as a signal
+#             plt.plot(x_data, y_data, color='blue', linewidth=1)
 
-            # Set the title and labels
-            plt.title(title)
-            plt.xlabel(x_label)
-            plt.ylabel(y_label)
+#             # Set the title and labels
+#             plt.title(title)
+#             plt.xlabel(x_label)
+#             plt.ylabel(y_label)
 
-            # Set x and y limits to accommodate the signal range
-            plt.xlim(x_data.min(), x_data.max())  # X-axis based on time or samples
-            plt.ylim(y_data.min() - 1, y_data.max() + 1)  # Adjust y-limits as needed
+#             # Set x and y limits to accommodate the signal range
+#             plt.xlim(x_data.min(), x_data.max())  # X-axis based on time or samples
+#             plt.ylim(y_data.min() - 1, y_data.max() + 1)  # Adjust y-limits as needed
 
-            plt.grid(True)
-            plt.show()
-        else:
-            print("Error: No data to plot.")
-
-
-
-def main():
-    """Main function to run the data loading and plotting."""
-    # Replace 'your_file.csv' with the path to your CSV file
-    csv_file_path = "signals_data/ECG_Normal.csv"
-
-    # Create a DataLoader instance and load data
-    data_loader = DataLoader(csv_file_path)
-    data_loader.load_data()
-
-    # Get the loaded data
-    data = data_loader.get_data()
-
-    # Create a DataPlotter instance and plot the data
-    if data is not None:
-        data_plotter = DataPlotter(data)
-
-        # Assuming the first column is Time and the second column is Value
-        num_columns = data.shape[1]
-
-        if num_columns >= 2:
-            data_plotter.plot(x_index=0, y_index=1, title='Signal Plot', x_label='Time (s)', y_label='Amplitude')
-        else:
-            print("Error: The data does not have enough columns for plotting.")
+#             plt.grid(True)
+#             plt.show()
+#         else:
+#             print("Error: No data to plot.")
 
 
-if __name__ == '__main__':
-    main()
+
+# def main():
+#     """Main function to run the data loading and plotting."""
+#     # Replace 'your_file.csv' with the path to your CSV file
+#     csv_file_path = "signals_data/ECG_Normal.csv"
+
+#     # Create a DataLoader instance and load data
+#     data_loader = DataLoader(csv_file_path)
+#     data_loader.load_data()
+
+#     # Get the loaded data
+#     data = data_loader.get_data()
+
+#     # Create a DataPlotter instance and plot the data
+#     if data is not None:
+#         data_plotter = DataPlotter(data)
+
+#         # Assuming the first column is Time and the second column is Value
+#         num_columns = data.shape[1]
+
+#         if num_columns >= 2:
+#             data_plotter.plot(x_index=0, y_index=1, title='Signal Plot', x_label='Time (s)', y_label='Amplitude')
+#         else:
+#             print("Error: The data does not have enough columns for plotting.")
+
+
+# if __name__ == '__main__':
+#     main()
 

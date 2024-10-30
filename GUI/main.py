@@ -182,10 +182,6 @@ class MainApp(QMainWindow):
         if not self.snr_enabled:
             return
 
-        # if self.mixedSignalData is not None:
-        #     x = self.mixedSignalData[:, 0]
-        #     y = self.mixedSignalData[:, 1]
-        # else:
         time = self.signalData[:, 0]
         amplitude = self.signalData[:, 1]
         self.sampledTime, self.sampledSignal, self.reconstructedSignalData = sample_and_reconstruct(
@@ -302,8 +298,8 @@ class MainApp(QMainWindow):
         # Perform FFT
         fft_result = np.fft.fft(reconstructedSignalData)
 
-        N = len(reconstructedSignalData)
-        frequencies = np.fft.fftfreq(N, d=time_difference)
+        reconstructed_length = len(reconstructedSignalData)
+        frequencies = np.fft.fftfreq(reconstructed_length, d=time_difference)
 
         # Calculate the magnitude of the FFT
         magnitude = np.abs(fft_result)
@@ -314,19 +310,19 @@ class MainApp(QMainWindow):
             return
 
         # Plot the positive frequencies and their corresponding magnitudes
-        self.frequencyDomain.plot(frequencies[:N // 2], magnitude[:N // 2], pen=(255, 0, 0), width=2)
+        self.frequencyDomain.plot(frequencies[:reconstructed_length // 2], magnitude[:reconstructed_length // 2], pen=(255, 0, 0), width=2)
 
         # Optionally, set the axis limits for better visibility
-        self.frequencyDomain.setXRange(0, np.max(frequencies[:N // 2]), padding=0)
-        self.frequencyDomain.setYRange(0, np.max(magnitude[:N // 2]), padding=0)
+        self.frequencyDomain.setXRange(0, np.max(frequencies[:reconstructed_length // 2]), padding=0)
+        self.frequencyDomain.setYRange(0, np.max(magnitude[:reconstructed_length // 2]), padding=0)
 
     def plot_frequency_domain(self, original_amplitude, time_step):
-        N = len(original_amplitude)
+        reconstructed_length = len(original_amplitude)
 
         original_fft_values = np.fft.fft(original_amplitude)
-        original_fft_frequencies = np.fft.fftfreq(N, d=time_step)
-        original_positive_frequencies = original_fft_frequencies[:N // 2]
-        original_magnitudes = np.abs(original_fft_values[:N // 2])
+        original_fft_frequencies = np.fft.fftfreq(reconstructed_length, d=time_step)
+        original_positive_frequencies = original_fft_frequencies[:reconstructed_length // 2]
+        original_magnitudes = np.abs(original_fft_values[:reconstructed_length // 2])
 
 
 
