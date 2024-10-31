@@ -7,24 +7,18 @@ from scipy.fft import fft, fftfreq
 from scipy.interpolate import CubicSpline
 
 class DataLoader:
-    """Class to load data from a CSV file."""
 
     def __init__(self, file_path):
-        """Initialize with the path to the CSV file."""
         self.file_path = file_path
         self.data = None
         self.load_data()
 
     def load_data(self):
-        """Load data from the CSV file into a DataFrame."""
         try:
-            # Load the CSV file, assuming headers
             self.data = pd.read_csv(self.file_path)
 
-            # Drop rows where all columns are NaN (if any)
             self.data.dropna(how='all', inplace=True)
 
-            # Convert data to numeric, coercing errors to NaN
             self.data = self.data.apply(pd.to_numeric, errors='coerce')
 
             print("Data loaded successfully.")
@@ -34,7 +28,6 @@ class DataLoader:
             print(f"An error occurred: {e}")
 
     def get_data(self):
-        """Return the first 1000 points of the loaded data as a NumPy array."""
         return self.data.to_numpy()[:1000]
 
 
@@ -48,8 +41,7 @@ def linear_interp(sample_points, sample_values, interpolated_points):
 def zoh_reconstruction(sample_points, sample_values, interpolated_points):
 
     reconstructed_signal = np.zeros_like(interpolated_points)
-    
-    # Loop through each interval and hold the last sample value constant until the next sampled point
+
     for i in range(len(sample_points) - 1):
         
         mask = (interpolated_points >= sample_points[i]) & (interpolated_points < sample_points[i + 1])
@@ -63,8 +55,7 @@ def zoh_reconstruction(sample_points, sample_values, interpolated_points):
 def cubic_spline_interp(sample_points, sample_values, interpolated_points):
         
     cubic_spline = CubicSpline(sample_points, sample_values)
-    
-    # Evaluate the spline over the full time range
+
     reconstructed_signal = cubic_spline(interpolated_points)
     
     return reconstructed_signal
@@ -77,11 +68,9 @@ def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
     return sampled_time, sampled_signal, reconstructed_signal
 
 def calculate_error(original_signal, reconstructed_signal):
-    """Calculate the absolute error between the original and reconstructed signals."""
     return np.abs(original_signal - reconstructed_signal)
 
 def calculate_frequency_domain(signal, time):
-    """Calculate the frequency domain representation of the given signal."""
     freqs = fftfreq(len(time), time[1] - time[0])
     fft_signal = np.abs(fft(signal))
 
@@ -92,7 +81,6 @@ def calculate_frequency_domain(signal, time):
     return freqs, fft_signal
 
 def calculate_max_frequency(signal, time):
-    """Calculate the maximum frequency of the signal."""
     # Find the Nyquist frequency
     sampling_rate = 1 / (time[1] - time[0])
     max_frequency = sampling_rate / 2
@@ -105,11 +93,11 @@ class SignalSamplingApp(QtWidgets.QWidget):
         # self.data_loader = DataLoader(csv_file_path)  # Load data from CSV
         # self.signal = self.data_loader.get_data().flatten()  # Flatten to ensure 1D array
         # self.max_time_axis = len(self.signal)
-        # self.time = np.linspace(0, self.max_time_axis / 1000, self.max_time_axis)  # Assuming a sample rate of 1000Hz
-        self.data_loader = DataLoader(csv_file_path)  # Load data from CSV
-        data = self.data_loader.get_data()  # Get the loaded data as a NumPy array
-        self.time = data[:, 0]  # Extract the first column as time
-        self.signal = data[:, 1]  # Extract the second column as amplitude
+        # self.time = np.linspace(0, self.max_time_axis / 1000, self.max_time_axis)
+        self.data_loader = DataLoader(csv_file_path)
+        data = self.data_loader.get_data()
+        self.time = data[:, 0]
+        self.signal = data[:, 1]
 
         # self.max_time_axis = len(self.signal)
         self.f_max = calculate_max_frequency(self.signal, self.time)
@@ -135,19 +123,17 @@ class SignalSamplingApp(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
 
-        # Create plots
+
         self.original_plot = pg.PlotWidget(title="Original Signal")
         self.reconstructed_plot = pg.PlotWidget(title="Reconstructed Signal")
         self.error_plot = pg.PlotWidget(title="Absolute Error (Original - Reconstructed)")
         self.frequency_plot = pg.PlotWidget(title="Frequency Domain")
 
-        # Add plots vertically
         layout.addWidget(self.original_plot)
         layout.addWidget(self.reconstructed_plot)
         layout.addWidget(self.error_plot)
         layout.addWidget(self.frequency_plot)
 
-        # Slider for sampling
         control_panel = QtWidgets.QHBoxLayout()
         self.sampling_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.sampling_slider.setMinimum(2)
@@ -162,7 +148,6 @@ class SignalSamplingApp(QtWidgets.QWidget):
         control_panel.addWidget(self.sampling_label)
         layout.addLayout(control_panel)
 
-        # Reconstruction method selection
         reconstruction_layout = QtWidgets.QHBoxLayout()
         self.reconstruction_method_label = QtWidgets.QLabel("Reconstruction Method: ")
         reconstruction_layout.addWidget(self.reconstruction_method_label)
@@ -178,7 +163,6 @@ class SignalSamplingApp(QtWidgets.QWidget):
         layout.addLayout(control_panel)
 
     def update_sampling_slider(self):
-        """Reconfigure the sampling slider based on the current f_max."""
         self.sampling_slider.setMaximum(int((4 * self.f_max)))
         self.sampling_slider.setTickInterval(int(self.f_max))
         self.sampling_slider.setValue(min(self.sampling_rate, 4 * self.f_max))
@@ -192,9 +176,8 @@ class SignalSamplingApp(QtWidgets.QWidget):
         self.sample_and_reconstruct()
 
     def update_reconstruction_method(self, method_name):
-        """Update the interpolation method based on user selection."""
-        self.interp_method = self.interp_methods[method_name]  # Set to the actual function
-        self.sample_and_reconstruct()  # Call to update the signal with the new method
+        self.interp_method = self.interp_methods[method_name]
+        self.sample_and_reconstruct()
 
     def sample_and_reconstruct(self):
         sampled_time, sampled_signal, reconstructed_signal = sample_and_reconstruct(
@@ -208,21 +191,19 @@ class SignalSamplingApp(QtWidgets.QWidget):
         self.error_plot.clear()
         self.frequency_plot.clear()
 
-        # Plot original signal
+
         self.original_plot.plot(self.time, self.signal, pen='#007AFF', name="Original Signal")
         if sampled_time is not None and sampled_signal is not None:
             self.original_plot.plot(sampled_time, sampled_signal, pen=None, symbol='o', symbolBrush='r',
                                     size=5)  # Adjust size
 
-        # Plot reconstructed signal
+
         if reconstructed_signal is not None:
             self.reconstructed_plot.plot(self.time, reconstructed_signal, pen='#007AFF')
 
-            # Calculate and plot absolute error
-            error = calculate_error(self.signal, reconstructed_signal)  # Calculate absolute error
-            self.error_plot.plot(self.time, error, pen='#FF0000')  # Plot absolute error in red
+            error = calculate_error(self.signal, reconstructed_signal)
+            self.error_plot.plot(self.time, error, pen='#FF0000')
 
-            # Frequency domain plot for original and reconstructed signals
             freqs_original, fft_original = calculate_frequency_domain(self.signal, self.time)
             freqs_reconstructed, fft_reconstructed = calculate_frequency_domain(reconstructed_signal, self.time)
 
@@ -231,19 +212,16 @@ class SignalSamplingApp(QtWidgets.QWidget):
             self.frequency_plot.plot(freqs_reconstructed[:len(freqs_reconstructed) // 2],
                                      fft_reconstructed[:len(freqs_reconstructed) // 2], pen=pg.mkPen('r', width=5))
 
-        # Set view range for original and reconstructed plots
         self.original_plot.setXRange(self.time[0], self.time[-1])
         self.original_plot.setYRange(np.min(self.signal), np.max(self.signal))
         self.reconstructed_plot.setXRange(self.time[0], self.time[-1])
         self.reconstructed_plot.setYRange(np.min(self.signal), np.max(self.signal))
 
-        # Set view range for error plot
         self.error_plot.setXRange(self.time[0], self.time[-1])
         self.error_plot.setYRange(0, np.max(error))
 
-        # Set view range for frequency plot
-        self.frequency_plot.setXRange(0, (1 / (self.time[1] - self.time[0])) / 2)  # Nyquist frequency
-        self.frequency_plot.setYRange(0, np.max([fft_original, fft_reconstructed]).max())  # Set to max of both signals
+        self.frequency_plot.setXRange(0, (1 / (self.time[1] - self.time[0])) / 2)
+        self.frequency_plot.setYRange(0, np.max([fft_original, fft_reconstructed]).max())
 
     def main(self):
         self.show()

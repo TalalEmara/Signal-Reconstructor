@@ -92,7 +92,7 @@ class Composer(QWidget):
         self.componentsTable.setItem(row, 1, QTableWidgetItem(str(amplitude)))
         self.componentsTable.setItem(row, 2, QTableWidgetItem(str(frequency)))
 
-        delete_button = QPushButton("X")  # Create a button without a text label
+        delete_button = QPushButton("X")
         # delete_button.setIcon(QIcon("GUI/Styles/Icons/delete3.png"))
         # delete_button.setIconSize(QSize(20, 20))
         delete_button.setStyleSheet("""
@@ -102,7 +102,7 @@ class Composer(QWidget):
         border: none;
         
         """)
-        # delete_button.setFixedSize(30, 30)  # Set a fixed size for the button
+        delete_button.setFixedSize(30, 10)
         button_widget = QWidget()
         button_widget.setStyleSheet("""
         color = red;
@@ -113,8 +113,8 @@ class Composer(QWidget):
         """)
         button_layout = QHBoxLayout(button_widget)
         button_layout.addWidget(delete_button)
-        button_layout.setAlignment(Qt.AlignCenter)  # Center the button
-        button_layout.setContentsMargins(0, 0, 0, 0)  # Remove spacing around the button
+        button_layout.setAlignment(Qt.AlignCenter)
+        button_layout.setContentsMargins(0, 0, 0, 0)
 
         print(row, amplitude, frequency, signal_type)
 

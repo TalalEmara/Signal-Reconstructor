@@ -139,7 +139,7 @@ class MainApp(QMainWindow):
         self.originalSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.originalSignal))
         self.reconstructedSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.reconstructedSignal))
         self.diffrenceGraph.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.diffrenceGraph))
-        # self.frequencyDomain.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.frequencyDomain))
+        # self.frequencyDomain.sigXRangeChanged.connect(lambda: self.limit_axis(self.frequencyDomain))
 
         # link panning
         self.originalSignal.sigXRangeChanged.connect(self.sync_pan)
@@ -154,14 +154,18 @@ class MainApp(QMainWindow):
             return
 
         self.is_panning = True
-        x_min, x_max = plot_widget.viewRange()[0]
+        time_min, time_max = plot_widget.viewRange()[0]
+
 
         if plot_widget != self.originalSignal:
-            self.originalSignal.setXRange(x_min, x_max, padding=0)
+            self.originalSignal.setXRange(time_min, time_max, padding=0)
+
         if plot_widget != self.reconstructedSignal:
-            self.reconstructedSignal.setXRange(x_min, x_max, padding=0)
+            self.reconstructedSignal.setXRange(time_min, time_max, padding=0)
+
         if plot_widget != self.diffrenceGraph:
-            self.diffrenceGraph.setXRange(x_min, x_max, padding=0)
+            self.diffrenceGraph.setXRange(time_min, time_max, padding=0)
+
 
         self.is_panning = False
 
@@ -204,18 +208,12 @@ class MainApp(QMainWindow):
 
         self.reconstructedSignal.plot(time, noisy_signal_reconstructed, pen=mkPen(color="b", width=2),
                                       name="Original Signal")
-        # self.reconstructedSignal.plot(time, noisy_signal_reconstructed, pen=mkPen(color="r", width=2), name="Noisy Signal")
-
         self.diffrenceGraph.clear()
-        # # if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.ndim == 1:
-        # difference = self.calculate_difference(amplitude, reconstructed_amplitude)
-        # self.diffrenceGraph.plot(time, difference, pen=mkPen(color="b", width=2),
-        #                          name="Difference")
         noise_difference = self.calculate_difference(noisy_signal, noisy_signal_reconstructed)
         self.diffrenceGraph.plot(time, noise_difference, pen=mkPen(color="r", width=2),
                                  name="Difference")
         time_step = time[1] - time[0]
-        self.frequencyDomain.clear()  # Clear previous frequency plot
+        self.frequencyDomain.clear()
         self.plot_frequency_domain(noisy_signal, time_step)
 
     def generate_default_data(self):  # testing
@@ -230,7 +228,6 @@ class MainApp(QMainWindow):
         try:
             self.updateSignalData(self.signalData)
         except Exception as e:
-            # Handle the exception (e.g., log it or show a message)
             print(f"An error occurred while updating signal data: {e}")
 
     def updateSamplingMethod(self, method):
@@ -303,25 +300,20 @@ class MainApp(QMainWindow):
     def add_frequency_domain(self, reconstructedSignalData, time_difference):
         reconstructedSignalData = np.array(reconstructedSignalData)
 
-        # Perform FFT
         fft_result = np.fft.fft(reconstructedSignalData)
 
         reconstructed_length = len(reconstructedSignalData)
         frequencies = np.fft.fftfreq(reconstructed_length, d=time_difference)
 
-        # Calculate the magnitude of the FFT
         magnitude = np.abs(fft_result)
 
-        # Check if frequency and magnitude arrays are correctly formed
         if len(frequencies) != len(magnitude):
             print("Length mismatch between frequencies and magnitudes!")
             return
 
-        # Plot the positive frequencies and their corresponding magnitudes
         self.frequencyDomain.plot(frequencies[:reconstructed_length // 2], magnitude[:reconstructed_length // 2],
                                   pen=(255, 0, 0), width=2)
 
-        # Optionally, set the axis limits for better visibility
         self.frequencyDomain.setXRange(0, np.max(frequencies[:reconstructed_length // 2]), padding=0)
         self.frequencyDomain.setYRange(0, np.max(magnitude[:reconstructed_length // 2]), padding=0)
 
@@ -340,13 +332,13 @@ class MainApp(QMainWindow):
                                   pen=mkPen(color="#a000c8", width=2))
 
         self.frequencyDomain.plot(-self.sampling_rate + original_positive_frequencies, original_magnitudes,
-                                  pen=mkPen(color="b", width=2), name=" Signals due to periodicity")
+                                  pen=mkPen(color=(0, 0, 255, 150), width=2), name=" Signals due to periodicity")
         self.frequencyDomain.plot(self.sampling_rate + original_positive_frequencies, original_magnitudes,
-                                  pen=mkPen(color="b", width=2), )
+                                  pen=mkPen(color=(0, 0, 255, 150), width=2), )
         self.frequencyDomain.plot(-1 * original_positive_frequencies - self.sampling_rate, original_magnitudes,
-                                  pen=mkPen(color="b", width=2), )
+                                  pen=mkPen(color=(0, 0, 255, 150), width=2), )
         self.frequencyDomain.plot(-1 * original_positive_frequencies + self.sampling_rate, original_magnitudes,
-                                  pen=mkPen(color="b", width=2), )
+                                  pen=mkPen(color=(0, 0, 255, 150), width=2), )
 
         threshold = 0.1 * np.max(original_magnitudes)  # Adjust threshold as needed
         significant_frequencies = original_positive_frequencies[original_magnitudes > threshold]
@@ -434,8 +426,7 @@ class MainApp(QMainWindow):
                 self.updateSignalData(self.signalData)
 
     def clearAll(self):
-        self.controlBar.samplingRateInput.setValue(0)
-        self.controlBar.samplingRateInput.setValue(0)
+        self.controlBar.samplingRateInput.setValue(5)
         self.originalSignal.clear()
         self.signalData[:, 1] *= 0
         self.reconstructedSignal.clear()
@@ -447,9 +438,7 @@ class MainApp(QMainWindow):
 
     def resizeEvent(self, event):
         print(f"Window resized: {self.width()} x {self.height()}")
-        # Set threshold width to trigger orientation change
         threshold_width = 1700
-        # Check width and set slider orientation accordingly
         if self.width() < threshold_width:
             self.controlBar.snrSlider.setOrientation(Qt.Vertical)
             self.controlBar.samplingSlider.setOrientation(Qt.Vertical)
@@ -457,9 +446,7 @@ class MainApp(QMainWindow):
             self.controlBar.snrSlider.setOrientation(Qt.Horizontal)
             self.controlBar.samplingSlider.setOrientation(Qt.Horizontal)
 
-        # Force the toolbar to update with new orientation
         self.controlBar.update()
-        # Trigger the QMainWindow’s resize event as well
         super().resizeEvent(event)
 
 

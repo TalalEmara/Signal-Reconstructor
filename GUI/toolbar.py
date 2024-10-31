@@ -127,7 +127,6 @@ class ToolBar(QWidget):
         self.setLayout(self.layout)
 
     def loadSignal(self):
-        # Open a file dialog to select a CSV file
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv);;All Files (*)",
                                                    options=options)
@@ -138,7 +137,7 @@ class ToolBar(QWidget):
                 data = pd.read_csv(file_name)
                 self.dataLoaded.emit(data)
                 print("CSV Data Loaded Successfully:")
-                print(data)  # Print or process the data as needed
+                print(data)
             except Exception as e:
                 print(f"Error loading CSV file: {e}")
 

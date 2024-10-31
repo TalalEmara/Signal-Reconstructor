@@ -3,24 +3,22 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 class DataLoader:
-    """Class to load data from a CSV file."""
-
     def __init__(self, file_path):
-        """Initialize with the path to the CSV file."""
+
         self.file_path = file_path
         self.data = None
         self.load_data()
 
     def load_data(self):
-        """Load data from the CSV file into a DataFrame."""
+
         try:
-            # Load the CSV file, assuming headers
+
             self.data = pd.read_csv(self.file_path)
 
-            # Drop rows where all columns are NaN (if any)
+
             self.data.dropna(how='all', inplace=True)
 
-            # Convert data to numeric, coercing errors to NaN
+
             self.data = self.data.apply(pd.to_numeric, errors='coerce')
 
             print("Data loaded successfully.")
@@ -31,7 +29,7 @@ class DataLoader:
             print(f"An error occurred: {e}")
 
     def get_data(self):
-        """Return the loaded data."""
+
         return self.data.to_numpy()[:1000]
 
 
