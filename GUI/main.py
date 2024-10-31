@@ -434,8 +434,8 @@ class MainApp(QMainWindow):
                 self.updateSignalData(self.signalData)
 
     def clearAll(self):
-        self.signalfMax = 0
-        self.controlBar.signalfMax = self.signalfMax
+        self.controlBar.samplingRateInput.setValue(0)
+        self.controlBar.samplingRateInput.setValue(0)
         self.originalSignal.clear()
         self.signalData[:, 1] *= 0
         self.reconstructedSignal.clear()
