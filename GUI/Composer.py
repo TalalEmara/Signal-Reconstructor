@@ -144,14 +144,11 @@ class Composer(QWidget):
 
         if self.componentsTable.item(row, 1):
             amplitude = float(self.componentsTable.item(row, 1).text())
-        else:
-            amplitude = amplitude
+
 
         if self.componentsTable.item(row, 2):
             frequency = float(self.componentsTable.item(row, 2).text())
-        else:
-            frequency = frequency
-
+        
         self.valueUpdated.emit(row, amplitude, frequency, signal_type)
 
         self.update_delete_button(row, amplitude, frequency, signal_type)

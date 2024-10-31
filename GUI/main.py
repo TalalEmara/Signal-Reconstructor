@@ -43,7 +43,6 @@ class MainApp(QMainWindow):
         self.reconstructedSignalData = self.signalData
 
         self.setWindowTitle("Signal")
-        self.resize(1080, 720)
         self.setWindowState(Qt.WindowMaximized)
         self.setStyleSheet("background-color: #f0f1f5;")
 
@@ -445,6 +444,23 @@ class MainApp(QMainWindow):
         self.composer.clear_table()
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
         self.data_loader = None
+
+    def resizeEvent(self, event):
+        print(f"Window resized: {self.width()} x {self.height()}")
+        # Set threshold width to trigger orientation change
+        threshold_width = 1700
+        # Check width and set slider orientation accordingly
+        if self.width() < threshold_width:
+            self.controlBar.snrSlider.setOrientation(Qt.Vertical)
+            self.controlBar.samplingSlider.setOrientation(Qt.Vertical)
+        else:
+            self.controlBar.snrSlider.setOrientation(Qt.Horizontal)
+            self.controlBar.samplingSlider.setOrientation(Qt.Horizontal)
+
+        # Force the toolbar to update with new orientation
+        self.controlBar.update()
+        # Trigger the QMainWindow’s resize event as well
+        super().resizeEvent(event)
 
 
 if __name__ == "__main__":
