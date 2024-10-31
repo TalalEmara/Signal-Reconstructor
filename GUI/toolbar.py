@@ -48,9 +48,9 @@ class ToolBar(QWidget):
         self.snrInput.setAlignment(Qt.AlignCenter)
         self.snrInput.setStyleSheet(numberInputOffStyle)
 
-        self.snrSlider.setRange(0, 30)
+        self.snrSlider.setRange(1, 30)
 
-        self.snrInput.setRange(0, 30)
+        self.snrInput.setRange(1, 30)
         self.snrSlider.setValue(30)
         self.snrInput.setDecimals(2)
         self.snrInput.setValue(30)
