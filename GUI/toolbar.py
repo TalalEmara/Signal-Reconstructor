@@ -10,9 +10,7 @@ from Styles.ToolBarStyling import toolBarStyle, buttonStyle, buttonWhiteStyle, c
 
 class ToolBar(QWidget):
     dataLoaded = pyqtSignal(pd.DataFrame)
-    snrChanged = pyqtSignal(float)
     methodChanged = pyqtSignal(str)
-    snrEnabledChanged = pyqtSignal(bool)
     deleteSignal = pyqtSignal()
 
     samplingRateChanged = pyqtSignal(float)
@@ -39,31 +37,6 @@ class ToolBar(QWidget):
         self.clearButton = QPushButton("clear")
         self.clearButton.setStyleSheet(buttonWhiteStyle)
 
-        self.snrEnable = QCheckBox("SNR: ")
-        self.snrEnable.setStyleSheet(labelOffStyle)
-        self.snrSlider = QSlider(Qt.Horizontal)
-        self.snrSlider.setStyleSheet(sliderOffStyle)
-        self.snrInput = QDoubleSpinBox()
-        self.snrInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
-        self.snrInput.setAlignment(Qt.AlignCenter)
-        self.snrInput.setStyleSheet(numberInputOffStyle)
-
-        self.snrSlider.setRange(1, 30)
-
-        self.snrInput.setRange(1, 30)
-        self.snrSlider.setValue(30)
-        self.snrInput.setDecimals(2)
-        self.snrInput.setValue(30)
-        self.snrInput.setAlignment(Qt.AlignCenter)
-
-        self.snrSlider.setEnabled(False)
-        self.snrInput.setEnabled(False)
-
-        self.snrSlider.valueChanged.connect(lambda value: self.snrInput.setValue(value / 1.0))  # Convert to float
-        self.snrInput.valueChanged.connect(lambda value: self.snrSlider.setValue(int(value)))
-        self.snrSlider.valueChanged.connect(self.on_snr_changed)
-        self.snrEnable.stateChanged.connect(self.on_snr_enabled_changed)
-
         self.samplingMethodLabel = QLabel("reconstruction method: ")
         self.samplingMethod = QComboBox()
         self.samplingMethod.setStyleSheet(comboBoxStyle)
@@ -71,34 +44,6 @@ class ToolBar(QWidget):
         self.samplingMethod.addItem("Linear")
         self.samplingMethod.addItem("Zero-Order Hold")
         self.samplingMethod.addItem("Cubic-Spline")
-
-
-        self.samplingSlider = QSlider(Qt.Horizontal)
-        self.samplingSlider.setValue(int(200/self.signalfMax))
-        self.samplingSlider.setRange(int(200/self.signalfMax), 400)
-        self.samplingSlider.setSingleStep(1)
-        self.samplingSlider.setStyleSheet(sliderOnStyle)
-
-        self.samplingRateLabel = QLabel("sampling rate: ")
-        self.samplingRateInput = QDoubleSpinBox()
-        self.samplingRateInput.setRange(0, float('inf'))
-        self.samplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
-        self.samplingRateInput.setAlignment(Qt.AlignRight)
-        self.samplingRateInput.setStyleSheet(numberInputOnStyle)
-        self.samplingRateInput.setSuffix("Hz")
-
-        self.normSamplingRateInput = QDoubleSpinBox()
-        self.normSamplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
-        self.normSamplingRateInput.setAlignment(Qt.AlignCenter)
-        self.normSamplingRateInput.setStyleSheet(numberInputOnStyle)
-        self.normSamplingRateInput.setSuffix(" fmax")
-        self.normSamplingRateInput.setRange(0,4)
-
-        self.samplingSlider.valueChanged.connect(lambda value: self.normSamplingRateInput.setValue(value / 100.0))
-        self.normSamplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value * 100)))
-        self.normSamplingRateInput.valueChanged.connect(lambda: self.samplingRateInput.setValue(self.signalfMax * self.normSamplingRateInput.value()))
-        self.samplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value / self.signalfMax * 100)) if self.signalfMax else None)
-        self.samplingRateInput.valueChanged.connect(self.on_sampling_rate_changed)
         self.samplingMethod.currentIndexChanged.connect(self.onMethodChanged)
 
         self.rowLayout = QHBoxLayout()
@@ -110,16 +55,7 @@ class ToolBar(QWidget):
         self.rowLayout.addStretch(1)
         self.rowLayout.addWidget(self.samplingMethodLabel,1)
         self.rowLayout.addWidget(self.samplingMethod,15)
-        self.rowLayout.addStretch(3)
-        self.rowLayout.addWidget(self.samplingRateLabel,1)
-        self.rowLayout.addWidget(self.samplingSlider,25)
-        self.rowLayout.addWidget(self.normSamplingRateInput,5)
-        self.rowLayout.addWidget(self.samplingRateInput,7)
-        self.rowLayout.addStretch(1)
-        self.rowLayout.addWidget(self.snrEnable,2)
-        self.rowLayout.addWidget(self.snrSlider,20)
-        self.rowLayout.addWidget(self.snrInput,5)
-        # self.rowLayout.addStretch(20)
+        self.rowLayout.addStretch(30)
 
 
         self.layout = QVBoxLayout()
@@ -141,30 +77,9 @@ class ToolBar(QWidget):
             except Exception as e:
                 print(f"Error loading CSV file: {e}")
 
-    def on_sampling_rate_changed(self, value):
-        self.samplingRateChanged.emit(value)
 
     def onMethodChanged(self, value):
         self.methodChanged.emit(self.samplingMethod.currentText())
-    def on_snr_changed(self, value):
-        self.snrChanged.emit(value / 1.0)
-
-
-    def on_snr_enabled_changed(self, state):
-        is_enabled = state == Qt.Checked
-        self.snrEnabledChanged.emit(is_enabled)
-
-        self.snrSlider.setEnabled(is_enabled)
-        self.snrInput.setEnabled(is_enabled)
-
-        if is_enabled:
-            self.snrSlider.setStyleSheet(sliderOnStyle)
-            self.snrInput.setStyleSheet(numberInputOnStyle)
-            self.snrEnable.setStyleSheet(labelOnStyle)
-        else:
-            self.snrSlider.setStyleSheet(sliderOffStyle)
-            self.snrInput.setStyleSheet(numberInputOffStyle)
-            self.snrEnable.setStyleSheet(labelOffStyle)
 
 
     def on_delete_clicked(self):

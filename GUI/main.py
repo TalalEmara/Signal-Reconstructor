@@ -2,8 +2,8 @@ import os
 import sys
 
 import numpy as np
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QHBoxLayout, QSplitter
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QHBoxLayout, QSplitter, QCheckBox, QDoubleSpinBox, QSlider, QLabel
 from pyqtgraph import PlotWidget, mkPen
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -15,8 +15,15 @@ from Core.noise import add_noise
 from Core.mainCore import sample_and_reconstruct, sinc_interp, linear_interp, calculate_max_frequency, \
     zoh_reconstruction, cubic_spline_interp
 
+from Styles.ToolBarStyling import toolBarStyle, buttonStyle, buttonWhiteStyle, comboBoxStyle, sliderOnStyle,sliderOffStyle, TitleStyle, labelOffStyle,labelOnStyle, numberInputOffStyle,numberInputOnStyle
+
 
 class MainApp(QMainWindow):
+
+    snrEnabledChanged = pyqtSignal(bool)
+    snrChanged = pyqtSignal(float)
+    samplingRateChanged = pyqtSignal(float)
+
     def __init__(self, csv_file_path):
         super().__init__()
 
@@ -54,13 +61,14 @@ class MainApp(QMainWindow):
         self.controlBar.dataLoaded.connect(self.updateSignalData)
         self.controlBar.dataLoaded.connect(lambda data: self.updateSignalData(data.to_numpy()))
 
-        self.controlBar.snrEnabledChanged.connect(self.set_snr_enabled)
-        self.controlBar.snrChanged.connect(self.updateNoise)
-        self.controlBar.samplingRateChanged.connect(self.updateSamplingRate)
+        self.snrEnabledChanged.connect(self.set_snr_enabled)
+        self.snrChanged.connect(self.updateNoise)
+        self.samplingRateChanged.connect(self.updateSamplingRate)
         self.controlBar.methodChanged.connect(self.updateSamplingMethod)
         self.controlBar.clearButton.clicked.connect(self.clearAll)
 
-        self.controlBar.samplingRateInput.setValue(self.sampling_rate)
+        #self.controlBar.samplingRateInput.setValue(self.sampling_rate)
+        
 
         self.current_signal_index = None
 
@@ -68,6 +76,61 @@ class MainApp(QMainWindow):
         self.composer.valueAdded.connect(self.add_mixed_signal)
         self.composer.valueUpdated.connect(self.update_table_mixed_signal)
         self.composer.valueRemoved.connect(self.remove_element)
+
+
+        self.snrEnable = QCheckBox("SNR: ")
+        self.snrEnable.setStyleSheet(labelOffStyle)
+        self.snrSlider = QSlider(Qt.Horizontal)
+        self.snrSlider.setStyleSheet(sliderOffStyle)
+        self.snrInput = QDoubleSpinBox()
+        self.snrInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        self.snrInput.setAlignment(Qt.AlignCenter)
+        self.snrInput.setStyleSheet(numberInputOffStyle)
+
+        self.snrSlider.setRange(1, 30)
+
+        self.snrInput.setRange(1, 30)
+        self.snrSlider.setValue(30)
+        self.snrInput.setDecimals(2)
+        self.snrInput.setValue(30)
+        self.snrInput.setAlignment(Qt.AlignCenter)
+
+        self.snrSlider.setEnabled(False)
+        self.snrInput.setEnabled(False)
+
+        self.snrSlider.valueChanged.connect(lambda value: self.snrInput.setValue(value / 1.0))  # Convert to float
+        self.snrInput.valueChanged.connect(lambda value: self.snrSlider.setValue(int(value)))
+        self.snrSlider.valueChanged.connect(self.on_snr_changed)
+        self.snrEnable.stateChanged.connect(self.on_snr_enabled_changed)
+
+        self.samplingSlider = QSlider(Qt.Horizontal)
+        self.samplingSlider.setValue(int(200/self.signalfMax))
+        self.samplingSlider.setRange(int(200/self.signalfMax), 400)
+        self.samplingSlider.setSingleStep(1)
+        self.samplingSlider.setStyleSheet(sliderOnStyle)
+
+        self.samplingRateLabel = QLabel("Sampling Rate: ")
+        self.samplingRateInput = QDoubleSpinBox()
+        self.samplingRateInput.setRange(0, float('inf'))
+        self.samplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        self.samplingRateInput.setAlignment(Qt.AlignCenter)
+        self.samplingRateInput.setStyleSheet(numberInputOnStyle)
+        self.samplingRateInput.setSuffix("Hz")
+        self.samplingRateInput.setValue(self.sampling_rate)
+
+        self.normSamplingRateInput = QDoubleSpinBox()
+        self.normSamplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        self.normSamplingRateInput.setAlignment(Qt.AlignCenter)
+        self.normSamplingRateInput.setStyleSheet(numberInputOnStyle)
+        self.normSamplingRateInput.setSuffix(" fmax")
+        self.normSamplingRateInput.setRange(0,4)
+
+        self.samplingSlider.valueChanged.connect(lambda value: self.normSamplingRateInput.setValue(value / 100.0))
+        self.normSamplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value * 100)))
+        self.normSamplingRateInput.valueChanged.connect(lambda: self.samplingRateInput.setValue(self.signalfMax * self.normSamplingRateInput.value()))
+        self.samplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value / self.signalfMax * 100)) if self.signalfMax else None)
+        self.samplingRateInput.valueChanged.connect(self.on_sampling_rate_changed)
+
 
         self.controlBar.dataLoaded.connect(self.composer.clear_table)
         # self.composer.setStyleSheet("background:blue;")
@@ -118,7 +181,27 @@ class MainApp(QMainWindow):
         self.mainLayout.addLayout(self.composerLayout, 15)
 
         self.controlBarLayout.addWidget(self.controlBar)
+        #self.composerLayout.addWidget(self.composer)
+        # Adding the SNR and sampling sliders to the composerLayout
+
+        # horizontal layout for the 2 fields of sampling values
+        samplingRateInputLayout = QHBoxLayout()
+        samplingRateInputLayout.addWidget(self.samplingRateInput)    
+        #samplingRateInputLayout.addStretch(10)    
+        samplingRateInputLayout.addWidget(self.normSamplingRateInput)
+
+        self.samplingRateLabel.setStyleSheet(labelOnStyle)
+
+        self.composerLayout.addWidget(self.samplingRateLabel)
+        self.composerLayout.addWidget(self.samplingSlider)
+        self.composerLayout.addLayout(samplingRateInputLayout)
+
+        self.composerLayout.addWidget(self.snrEnable)
+        self.composerLayout.addWidget(self.snrSlider)
+        self.composerLayout.addWidget(self.snrInput)
+        self.composerLayout.addSpacing(3)
         self.composerLayout.addWidget(self.composer)
+
         self.originalSignalLayout.addWidget(self.originalSignal)
         self.reconstructedSignalLayout.addWidget(self.reconstructedSignal)
         self.diffrenceGraphLayout.addWidget(self.diffrenceGraph)
@@ -147,6 +230,33 @@ class MainApp(QMainWindow):
         self.diffrenceGraph.sigXRangeChanged.connect(self.sync_pan)
 
         self.is_panning = False
+
+    def on_sampling_rate_changed(self, value):
+        self.samplingRateChanged.emit(value)
+
+    def onMethodChanged(self, value):
+        self.methodChanged.emit(self.samplingMethod.currentText())
+
+    def on_snr_changed(self, value):
+        self.snrChanged.emit(value / 1.0)
+
+
+    def on_snr_enabled_changed(self, state):
+        is_enabled = state == Qt.Checked
+        self.snrEnabledChanged.emit(is_enabled)
+
+        self.snrSlider.setEnabled(is_enabled)
+        self.snrInput.setEnabled(is_enabled)
+
+        if is_enabled:
+            self.snrSlider.setStyleSheet(sliderOnStyle)
+            self.snrInput.setStyleSheet(numberInputOnStyle)
+            self.snrEnable.setStyleSheet(labelOnStyle)
+        else:
+            self.snrSlider.setStyleSheet(sliderOffStyle)
+            self.snrInput.setStyleSheet(numberInputOffStyle)
+            self.snrEnable.setStyleSheet(labelOffStyle)
+
 
     def sync_pan(self, plot_widget):
 
@@ -185,7 +295,7 @@ class MainApp(QMainWindow):
     def set_snr_enabled(self, enabled):
         self.snr_enabled = enabled
         self.updateSignalData(self.signalData)
-        self.updateNoise(self.controlBar.snrSlider.value())
+        self.updateNoise(self.snrSlider.value())
 
     def updateNoise(self, snr_value):
         if not self.snr_enabled:
@@ -238,7 +348,7 @@ class MainApp(QMainWindow):
 
     def updateSignalData(self, data):
         self.signalData = np.array(data)
-        snr_value = self.controlBar.snrSlider.value()
+        snr_value = self.snrSlider.value()
         self.signalfMax = calculate_max_frequency(self.signalData[:, 1], self.signalData[:, 0])
 
         if self.signalData.shape[1] >= 2:
@@ -370,7 +480,7 @@ class MainApp(QMainWindow):
                                  symbolBrush='w')
         self.updateSignalData(self.signalData)
 
-        snr_value = self.controlBar.snrSlider.value()
+        snr_value = self.snrSlider.value()
         noisy_signal = add_noise(mixed_signal, snr_value) if self.snr_enabled else mixed_signal
 
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=2),
@@ -394,7 +504,7 @@ class MainApp(QMainWindow):
 
         self.updateSignalData(self.signalData)
 
-        snr_value = self.controlBar.snrSlider.value()
+        snr_value = self.snrSlider.value()
         noisy_signal = add_noise(updated_signal, snr_value) if self.snr_enabled else updated_signal
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="#a000c8", width=2),
                                  name="Noisy Updated Signal")
@@ -409,7 +519,7 @@ class MainApp(QMainWindow):
         self.originalSignal.plot(self.signalData[:, 0], old_signal, pen=mkPen(color="#a000c8", width=2),
                                  name="Updated Mixed Signal After Removal")
         self.updateSignalData(self.signalData)
-        snr_value = self.controlBar.snrSlider.value()
+        snr_value = self.snrSlider.value()
         noisy_signal = add_noise(old_signal, snr_value) if self.snr_enabled else old_signal
 
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="#a000c8", width=2),
@@ -426,7 +536,7 @@ class MainApp(QMainWindow):
                 self.updateSignalData(self.signalData)
 
     def clearAll(self):
-        self.controlBar.samplingRateInput.setValue(5)
+        self.samplingRateInput.setValue(5)
         self.originalSignal.clear()
         self.signalData[:, 1] *= 0
         self.reconstructedSignal.clear()
@@ -440,11 +550,11 @@ class MainApp(QMainWindow):
         print(f"Window resized: {self.width()} x {self.height()}")
         threshold_width = 1700
         if self.width() < threshold_width:
-            self.controlBar.snrSlider.setOrientation(Qt.Vertical)
-            self.controlBar.samplingSlider.setOrientation(Qt.Vertical)
+            self.snrSlider.setOrientation(Qt.Vertical)
+            self.samplingSlider.setOrientation(Qt.Vertical)
         else:
-            self.controlBar.snrSlider.setOrientation(Qt.Horizontal)
-            self.controlBar.samplingSlider.setOrientation(Qt.Horizontal)
+            self.snrSlider.setOrientation(Qt.Horizontal)
+            self.samplingSlider.setOrientation(Qt.Horizontal)
 
         self.controlBar.update()
         super().resizeEvent(event)
