@@ -192,14 +192,20 @@ class MainApp(QMainWindow):
 
         self.samplingRateLabel.setStyleSheet(labelOnStyle)
 
+        #self.composerLayout.addSpacing(10)
         self.composerLayout.addWidget(self.samplingRateLabel)
+        self.composerLayout.addSpacing(10)
         self.composerLayout.addWidget(self.samplingSlider)
+        self.composerLayout.addSpacing(10)
         self.composerLayout.addLayout(samplingRateInputLayout)
+        self.composerLayout.addSpacing(20)
 
         self.composerLayout.addWidget(self.snrEnable)
+        self.composerLayout.addSpacing(10)
         self.composerLayout.addWidget(self.snrSlider)
+        self.composerLayout.addSpacing(10)
         self.composerLayout.addWidget(self.snrInput)
-        self.composerLayout.addSpacing(3)
+        self.composerLayout.addSpacing(20)
         self.composerLayout.addWidget(self.composer)
 
         self.originalSignalLayout.addWidget(self.originalSignal)
