@@ -35,30 +35,30 @@ def sinc_interp(sample_points, sample_values, interpolated_points):
     time_diff = sample_points[1] - sample_points[0] + 1e-9
     return np.array([np.sum(sample_values * np.sinc((t_i - sample_points) / time_diff)) for t_i in interpolated_points])
 
+
 def linear_interp(sample_points, sample_values, interpolated_points):
     return np.interp(interpolated_points, sample_points, sample_values)
 
-def zoh_reconstruction(sample_points, sample_values, interpolated_points):
 
+def zoh_reconstruction(sample_points, sample_values, interpolated_points):
     reconstructed_signal = np.zeros_like(interpolated_points)
 
     for i in range(len(sample_points) - 1):
-        
         mask = (interpolated_points >= sample_points[i]) & (interpolated_points < sample_points[i + 1])
         reconstructed_signal[mask] = sample_values[i]
 
     reconstructed_signal[interpolated_points >= sample_points[-1]] = sample_values[-1]
-    
+
     return reconstructed_signal
 
 
 def cubic_spline_interp(sample_points, sample_values, interpolated_points):
-        
     cubic_spline = CubicSpline(sample_points, sample_values)
 
     reconstructed_signal = cubic_spline(interpolated_points)
-    
+
     return reconstructed_signal
+
 
 def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
     sample_indices = np.linspace(0, len(time) - 1, sampling_rate).astype(int)
@@ -67,8 +67,49 @@ def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
     reconstructed_signal = interp_method(sampled_time, sampled_signal, time)
     return sampled_time, sampled_signal, reconstructed_signal
 
-def calculate_error(original_signal, reconstructed_signal):
+
+def calculate_difference(original_signal, reconstructed_signal):
     return np.abs(original_signal - reconstructed_signal)
+
+
+# def sinc_interp(sample_points, sample_values, interpolated_points):
+#     time_diff = sample_points[1] - sample_points[0] + 1e-9
+#     return np.array([np.sum(sample_values * np.sinc((t_i - sample_points) / time_diff)) for t_i in interpolated_points])
+#
+# def linear_interp(sample_points, sample_values, interpolated_points):
+#     return np.interp(interpolated_points, sample_points, sample_values)
+#
+# def zoh_reconstruction(sample_points, sample_values, interpolated_points):
+#
+#     reconstructed_signal = np.zeros_like(interpolated_points)
+#
+#     for i in range(len(sample_points) - 1):
+#
+#         mask = (interpolated_points >= sample_points[i]) & (interpolated_points < sample_points[i + 1])
+#         reconstructed_signal[mask] = sample_values[i]
+#
+#     reconstructed_signal[interpolated_points >= sample_points[-1]] = sample_values[-1]
+#
+#     return reconstructed_signal
+#
+#
+# def cubic_spline_interp(sample_points, sample_values, interpolated_points):
+#
+#     cubic_spline = CubicSpline(sample_points, sample_values)
+#
+#     reconstructed_signal = cubic_spline(interpolated_points)
+#
+#     return reconstructed_signal
+#
+# def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
+#     sample_indices = np.linspace(0, len(time) - 1, sampling_rate).astype(int)
+#     sampled_time = time[sample_indices]
+#     sampled_signal = signal[sample_indices]
+#     reconstructed_signal = interp_method(sampled_time, sampled_signal, time)
+#     return sampled_time, sampled_signal, reconstructed_signal
+#
+# def calculate_error(original_signal, reconstructed_signal):
+#     return np.abs(original_signal - reconstructed_signal)
 
 def calculate_frequency_domain(signal, time):
     freqs = fftfreq(len(time), time[1] - time[0])
@@ -201,7 +242,7 @@ class SignalSamplingApp(QtWidgets.QWidget):
         if reconstructed_signal is not None:
             self.reconstructed_plot.plot(self.time, reconstructed_signal, pen='#007AFF')
 
-            error = calculate_error(self.signal, reconstructed_signal)
+            error = calculate_difference(self.signal, reconstructed_signal)
             self.error_plot.plot(self.time, error, pen='#FF0000')
 
             freqs_original, fft_original = calculate_frequency_domain(self.signal, self.time)

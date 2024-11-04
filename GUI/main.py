@@ -13,7 +13,7 @@ from Core.Data_load import DataLoader
 from Core.mixer import mixer, remove_elements
 from Core.noise import add_noise
 from Core.mainCore import sample_and_reconstruct, sinc_interp, linear_interp, calculate_max_frequency, \
-    zoh_reconstruction, cubic_spline_interp
+    zoh_reconstruction, cubic_spline_interp, calculate_difference
 
 from Styles.ToolBarStyling import toolBarStyle, buttonStyle, buttonWhiteStyle, comboBoxStyle, sliderOnStyle,sliderOffStyle, TitleStyle, labelOffStyle,labelOnStyle, numberInputOffStyle,numberInputOnStyle
 
@@ -309,14 +309,17 @@ class MainApp(QMainWindow):
 
         time = self.signalData[:, 0]
         amplitude = self.signalData[:, 1]
+
+        self.noisy_amplitude = add_noise(amplitude, snr_value)
+
         self.sampledTime, self.sampledSignal, self.reconstructedSignalData = sample_and_reconstruct(
-            self.signalData[:, 0], self.signalData[:, 1], self.sampling_rate, self.interp_method)
-        reconstructed_amplitude = self.reconstructedSignalData
-        noisy_signal = add_noise(amplitude, snr_value)
-        noisy_signal_reconstructed = add_noise(reconstructed_amplitude, snr_value)
+            self.signalData[:, 0], self.noisy_amplitude, self.sampling_rate, self.interp_method)
+
+        noisy_signal_reconstructed = self.reconstructedSignalData
+
         self.originalSignal.clear()
 
-        self.originalSignal.plot(time, noisy_signal, pen=mkPen(color="#a000c8", width=2),
+        self.originalSignal.plot(time, self.noisy_amplitude, pen=mkPen(color="#a000c8", width=2),
                                  name="Original Signal With Noise")
         self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
                                  symbolBrush='w')
@@ -325,12 +328,13 @@ class MainApp(QMainWindow):
         self.reconstructedSignal.plot(time, noisy_signal_reconstructed, pen=mkPen(color="b", width=2),
                                       name="Original Signal")
         self.diffrenceGraph.clear()
-        noise_difference = self.calculate_difference(noisy_signal, noisy_signal_reconstructed)
+        noise_difference = calculate_difference(self.noisy_amplitude, noisy_signal_reconstructed)
+        meanError = np.mean(noise_difference)
         self.diffrenceGraph.plot(time, noise_difference, pen=mkPen(color="r", width=2),
-                                 name="Difference")
+                                 name=f"Difference graph with Error: {meanError:.4f}")
         time_step = time[1] - time[0]
         self.frequencyDomain.clear()
-        self.plot_frequency_domain(noisy_signal, time_step)
+        self.plot_frequency_domain(self.noisy_amplitude, time_step)
 
     def generate_default_data(self):  # testing
         time = np.linspace(0, 1, 1000)
@@ -383,9 +387,9 @@ class MainApp(QMainWindow):
             print(self.signalData)
             self.diffrenceGraph.clear()
             if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.ndim == 1:
-                difference = self.calculate_difference(self.signalData[:, 1], reconstructed_amplitude)
+                difference = calculate_difference(self.signalData[:, 1], reconstructed_amplitude)
 
-                meanSquareError = np.mean(difference ** 2)
+                meanError = np.mean(difference)
                 # meanSquareError_text = f"Error: {meanSquareError:.4f}"
 
                 # meanSquareError_item = TextItem(meanSquareError_text, anchor=(0, 1), color='w')
@@ -395,7 +399,7 @@ class MainApp(QMainWindow):
 
                 # self.diffrenceGraph.addItem(meanSquareError_item)
                 self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2),
-                                         name=f"Difference graph with Error: {meanSquareError:.4f}")
+                                         name=f"Difference graph with Error: {meanError:.4f}")
 
             self.plot_frequency_domain(amplitude, self.signalData[1, 0] - self.signalData[0, 0])
 
@@ -403,8 +407,6 @@ class MainApp(QMainWindow):
         print(self.signalfMax)
 
         self.controlBar.signalfMax = self.signalfMax
-            # self.add_frequency_domain =(reconstructed_amplitude, self.signalData[1, 0] - self.signalData[0, 0])
-            # print(np.dim(y))
 
     def calculate_difference(self, originalSignal, reconstructedSignalData):
         length = max(len(originalSignal), len(reconstructedSignalData))
@@ -567,7 +569,7 @@ class MainApp(QMainWindow):
 
 
 if __name__ == "__main__":
-    csv_file_path = 'Signal-Reconstructor/signals_data/ECG_Normal.csv'
+    csv_file_path = 'signals_data/ECG_Normal.csv'
     app = QApplication(sys.argv)
     main_app = MainApp(csv_file_path)
     main_app.show()
