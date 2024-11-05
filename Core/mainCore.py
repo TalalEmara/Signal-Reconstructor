@@ -60,11 +60,31 @@ def cubic_spline_interp(sample_points, sample_values, interpolated_points):
     return reconstructed_signal
 
 
+import numpy as np
+
+
 def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
-    sample_indices = np.linspace(0, len(time) - 1, sampling_rate).astype(int)
-    sampled_time = time[sample_indices]
-    sampled_signal = signal[sample_indices]
+    sampled_time = []
+    sampled_signal = []
+
+    # Process the data in cycles of 250 points
+    for startpoint in range(0, len(time), 125):
+        endpoint = min(startpoint + 125, len(time))
+
+        # Sample the indices within this segment based on sampling rate
+        sample_indices = np.linspace(startpoint, endpoint - 1, sampling_rate).astype(int)
+
+        # Collect sampled data for the current segment
+        sampled_time.extend(time[sample_indices])
+        sampled_signal.extend(signal[sample_indices])
+
+    # Convert lists to numpy arrays
+    sampled_time = np.array(sampled_time)
+    sampled_signal = np.array(sampled_signal)
+
+    # Reconstruct the signal over the entire time range using the chosen interpolation method
     reconstructed_signal = interp_method(sampled_time, sampled_signal, time)
+
     return sampled_time, sampled_signal, reconstructed_signal
 
 

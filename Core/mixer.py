@@ -10,8 +10,8 @@ from scipy.signal import square
 
 def mixer(signal, amp, freq, signal_type = 'sin'):
     sampling_rate = len(signal[:, 1])  # samples per second
-    duration = 1.0  # seconds
-    dummy_time = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
+    duration = 20.0  # seconds
+    dummy_time =np.linspace(0, 20, 2500, endpoint=False)
 
     if signal_type == 'sin':
         mixed_component = amp * np.sin(2 * np.pi * freq * dummy_time)
@@ -30,7 +30,7 @@ def mixer(signal, amp, freq, signal_type = 'sin'):
 def remove_elements(signal, amp, freq, signal_type = 'sin'):
     sampling_rate = len(signal[:, 1])  # samples per second
     duration = 1.0  # seconds
-    dummy_time = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
+    dummy_time =np.linspace(0, 20, 2500, endpoint=False)
 
     if signal_type == 'sin':
         mixed_component = amp * np.sin(2 * np.pi * freq * dummy_time)
