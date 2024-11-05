@@ -39,8 +39,9 @@ class MainApp(QMainWindow):
         }
         self.interp_method = self.interp_methods["Whittaker-Shannon (sinc)"]
 
-        self.data_loader = DataLoader(csv_file_path)
-        self.signalData = self.data_loader.get_data()
+        # self.data_loader = DataLoader(csv_file_path)
+        # self.signalData = self.data_loader.get_data()
+        self.signalData=self.generate_default_data()
         self.signalfMax = calculate_max_frequency(self.signalData[:, 1], self.signalData[:, 0])
         print(f"max frequency: {self.signalfMax}")
 
@@ -328,7 +329,7 @@ class MainApp(QMainWindow):
         self.reconstructedSignal.plot(time, noisy_signal_reconstructed, pen=mkPen(color="b", width=2),
                                       name="Original Signal")
         self.diffrenceGraph.clear()
-        noise_difference = calculate_difference(self.noisy_amplitude, noisy_signal_reconstructed)
+        noise_difference = calculate_difference(self.signalData[:, 1], noisy_signal_reconstructed)
         meanError = np.mean(noise_difference)
         self.diffrenceGraph.plot(time, noise_difference, pen=mkPen(color="r", width=2),
                                  name=f"Difference graph with Error: {meanError:.4f}")
@@ -338,7 +339,7 @@ class MainApp(QMainWindow):
 
     def generate_default_data(self):  # testing
         time = np.linspace(0, 1, 1000)
-        amplitude = np.sin(2 * np.pi * 122 * time)
+        amplitude = np.sin(2 * np.pi * 10 * time)
         return np.column_stack((time, amplitude))
 
     def updateSamplingRate(self, samplingRate):
