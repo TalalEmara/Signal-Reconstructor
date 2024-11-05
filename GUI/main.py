@@ -443,19 +443,27 @@ class MainApp(QMainWindow):
         original_positive_frequencies = original_fft_frequencies[:reconstructed_length // 2]
         original_magnitudes = np.abs(original_fft_values[:reconstructed_length // 2])
 
+        print("noo")
+        print(len(self.reconstructedSignalData))
+        reconstructed_fft_values = np.fft.fft(self.reconstructedSignalData)
+        reconstructed_fft_frequencies = np.fft.fftfreq(reconstructed_length, d=time_step)
+        reconstructed_positive_frequencies = reconstructed_fft_frequencies[:reconstructed_length // 2]
+        reconstructed_magnitudes = np.abs(reconstructed_fft_values[:reconstructed_length // 2])
+
         self.frequencyDomain.clear()
-        self.frequencyDomain.plot(original_positive_frequencies, original_magnitudes,
+        self.frequencyDomain.plot(reconstructed_positive_frequencies, reconstructed_magnitudes,
                                   pen=mkPen(color="#a000c8", width=2), name="Original Signal Frequency Domain")
-        self.frequencyDomain.plot(-1 * original_positive_frequencies, original_magnitudes,
+        self.frequencyDomain.plot(-1 * reconstructed_positive_frequencies, reconstructed_magnitudes,
                                   pen=mkPen(color="#a000c8", width=2))
 
-        self.frequencyDomain.plot(-self.sampling_rate + original_positive_frequencies, original_magnitudes,
+        self.frequencyDomain.plot( reconstructed_positive_frequencies + self.sampling_rate, reconstructed_magnitudes,
                                   pen=mkPen(color=(0, 0, 255, 150), width=2), name=" Signals due to periodicity")
-        self.frequencyDomain.plot(self.sampling_rate + original_positive_frequencies, original_magnitudes,
+        self.frequencyDomain.plot( -reconstructed_positive_frequencies + self.sampling_rate, reconstructed_magnitudes,
                                   pen=mkPen(color=(0, 0, 255, 150), width=2), )
-        self.frequencyDomain.plot(-1 * original_positive_frequencies - self.sampling_rate, original_magnitudes,
-                                  pen=mkPen(color=(0, 0, 255, 150), width=2), )
-        self.frequencyDomain.plot(-1 * original_positive_frequencies + self.sampling_rate, original_magnitudes,
+
+        self.frequencyDomain.plot( reconstructed_positive_frequencies - self.sampling_rate, reconstructed_magnitudes,
+                                  pen=mkPen(color=(0, 0, 255, 150), width=2))
+        self.frequencyDomain.plot( -reconstructed_positive_frequencies - self.sampling_rate, reconstructed_magnitudes,
                                   pen=mkPen(color=(0, 0, 255, 150), width=2), )
 
         threshold = 0.1 * np.max(original_magnitudes)  # Adjust threshold as needed
