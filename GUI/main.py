@@ -494,25 +494,67 @@ class MainApp(QMainWindow):
         # self.frequencyDomain.setXRange(-max_frequency * 1.1, max_frequency * 1.1, padding=0.05)
         # self.frequencyDomain.setYRange(0, max_magnitude * 1.1, padding=0.05)
 
+    # def add_mixed_signal(self, amplitude, frequency, signal_type):
+    #     self.old_amplitude = amplitude
+    #     self.old_frequency = frequency
+    #     self.old_type = signal_type
+
+    #     mixed_signal = mixer(self.signalData, amplitude, frequency, signal_type)
+
+    #     self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal))
+    #     self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
+    #                              symbolBrush='w')
+    #     self.updateSignalData(self.signalData)
+
+    #     snr_value = self.snrSlider.value()
+    #     noisy_signal = add_noise(mixed_signal, snr_value) if self.snr_enabled else mixed_signal
+
+    #     self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=2),
+    #                              name="Noisy Mixed Signal")
+    #     time_step = self.signalData[1, 0] - self.signalData[0, 0]
+    #     self.plot_frequency_domain(mixed_signal, time_step)
+
     def add_mixed_signal(self, amplitude, frequency, signal_type):
+        # Only proceed if amplitude, frequency, or signal type has actually changed
+        if (amplitude, frequency, signal_type) == (self.old_amplitude, self.old_frequency, self.old_type):
+            return  # Skip redundant updates
+
+        # Update cached signal parameters
         self.old_amplitude = amplitude
         self.old_frequency = frequency
         self.old_type = signal_type
 
+        # Generate the mixed signal only if parameters have changed
         mixed_signal = mixer(self.signalData, amplitude, frequency, signal_type)
-
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal))
+
+        # Clear and plot the sampled signal
+        self.originalSignal.clear()
         self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
-                                 symbolBrush='w')
+                                symbolBrush='w')
+
+        # Update signal data with newly mixed signal
         self.updateSignalData(self.signalData)
 
+        # Check if noise addition is necessary based on SNR and snr_enabled status
         snr_value = self.snrSlider.value()
-        noisy_signal = add_noise(mixed_signal, snr_value) if self.snr_enabled else mixed_signal
+        if self.snr_enabled and not hasattr(self, 'noisy_signal_applied'):
+            noisy_signal = add_noise(mixed_signal, snr_value)
+            self.noisy_signal_applied = True
+        elif not self.snr_enabled:
+            self.noisy_signal_applied = False
+            noisy_signal = mixed_signal
+        else:
+            noisy_signal = self.noisy_amplitude  # Reuse previous noisy signal if unchanged
 
+        # Plot noisy signal, avoiding redundant plotting
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=2),
-                                 name="Noisy Mixed Signal")
+                                name="Noisy Mixed Signal")
+
+        # Compute FFT for frequency domain visualization only if signal data is modified
         time_step = self.signalData[1, 0] - self.signalData[0, 0]
         self.plot_frequency_domain(mixed_signal, time_step)
+
 
     def update_table_mixed_signal(self, row, amplitude, frequency, signal_type):
         old_signal = remove_elements(self.signalData, self.old_amplitude, self.old_frequency, self.old_type)
