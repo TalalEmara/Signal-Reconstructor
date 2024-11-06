@@ -3,34 +3,31 @@ import sys
 
 import numpy as np
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QHBoxLayout, QSplitter, QCheckBox, QDoubleSpinBox, QSlider, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QHBoxLayout, QSplitter, QCheckBox, \
+    QDoubleSpinBox, QSlider, QLabel
 from pyqtgraph import PlotWidget, mkPen
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from toolbar import ToolBar
 from Composer import Composer
-from Core.Data_load import DataLoader
 from Core.mixer import mixer, remove_elements
 from Core.noise import add_noise
 from Core.mainCore import sample_and_reconstruct, sinc_interp, linear_interp, calculate_max_frequency, \
     zoh_reconstruction, cubic_spline_interp, calculate_difference
 
-from Styles.ToolBarStyling import toolBarStyle, buttonStyle, buttonWhiteStyle, comboBoxStyle, sliderOnStyle,sliderOffStyle, TitleStyle, labelOffStyle,labelOnStyle, numberInputOffStyle,numberInputOnStyle
+from Styles.ToolBarStyling import sliderOnStyle, \
+    sliderOffStyle, labelOffStyle, labelOnStyle, numberInputOffStyle, numberInputOnStyle
 
 
 class MainApp(QMainWindow):
-
     snrEnabledChanged = pyqtSignal(bool)
     snrChanged = pyqtSignal(float)
     samplingRateChanged = pyqtSignal(float)
 
-    def __init__(self, csv_file_path):
-        super().__init__()
-
+    def initialize(self):
         self.old_amplitude = None
         self.old_frequency = None
         self.old_type = None
-
         self.interp_methods = {
             "Whittaker-Shannon (sinc)": sinc_interp,
             "Linear": linear_interp,
@@ -38,24 +35,37 @@ class MainApp(QMainWindow):
             "Cubic-Spline": cubic_spline_interp
         }
         self.interp_method = self.interp_methods["Whittaker-Shannon (sinc)"]
-
         # self.data_loader = DataLoader(csv_file_path)
         # self.signalData = self.data_loader.get_data()
-        self.signalData=self.generate_default_data()
+        self.signalData = self.generate_default_data()
         self.signalfMax = calculate_max_frequency(self.signalData[:, 1], self.signalData[:, 0])
-        print(f"max frequency: {self.signalfMax}")
-
         self.sampling_rate = 5
-
         self.mixedSignalData = None
         self.reconstructedSignalData = self.signalData
+
+    def createUI(self):
+        self.createUIElements()
+        self.stylingUI()
+        self.linkingUI()
+
+    def createUIElements(self):
+        self.controlBar = ToolBar()
+        print()
+    def stylingUI(self):
+        print()
+
+    def linkingUI(self):
+        self.controlBar.signalfMax = self.signalfMax
+        
+    def __init__(self, csv_file_path):
+        super().__init__()
+        self.initialize()
+        self.createUI()
+
 
         self.setWindowTitle("Signal")
         self.setWindowState(Qt.WindowMaximized)
         self.setStyleSheet("background-color: #f0f1f5;")
-
-        self.controlBar = ToolBar()
-        self.controlBar.signalfMax = self.signalfMax
 
         self.snr_enabled = False
         # self.controlBar.setStyleSheet("background:red;")
@@ -68,8 +78,7 @@ class MainApp(QMainWindow):
         self.controlBar.methodChanged.connect(self.updateSamplingMethod)
         self.controlBar.clearButton.clicked.connect(self.clearAll)
 
-        #self.controlBar.samplingRateInput.setValue(self.sampling_rate)
-        
+        # self.controlBar.samplingRateInput.setValue(self.sampling_rate)
 
         self.current_signal_index = None
 
@@ -77,7 +86,6 @@ class MainApp(QMainWindow):
         self.composer.valueAdded.connect(self.add_mixed_signal)
         self.composer.valueUpdated.connect(self.update_table_mixed_signal)
         self.composer.valueRemoved.connect(self.remove_element)
-
 
         self.snrEnable = QCheckBox("SNR: ")
         self.snrEnable.setStyleSheet(labelOffStyle)
@@ -105,12 +113,15 @@ class MainApp(QMainWindow):
         self.snrEnable.stateChanged.connect(self.on_snr_enabled_changed)
 
         self.samplingSlider = QSlider(Qt.Horizontal)
-        self.samplingSlider.setValue(int(200/self.signalfMax))
-        self.samplingSlider.setRange(int(200/self.signalfMax), 400)
+        self.samplingSlider.setValue(int(200 / self.signalfMax))
+        self.samplingSlider.setRange(int(200 / self.signalfMax), 400)
         self.samplingSlider.setSingleStep(1)
         self.samplingSlider.setStyleSheet(sliderOnStyle)
 
         self.samplingRateLabel = QLabel("Sampling Rate: ")
+        self.samplingRateLabel.setStyleSheet(
+            """font-family: 'Samsung Sans'; font-size: 14px; font-weight: 600; color: #2252A0;""")
+
         self.samplingRateInput = QDoubleSpinBox()
         self.samplingRateInput.setRange(0, float('inf'))
         self.samplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
@@ -124,14 +135,24 @@ class MainApp(QMainWindow):
         self.normSamplingRateInput.setAlignment(Qt.AlignCenter)
         self.normSamplingRateInput.setStyleSheet(numberInputOnStyle)
         self.normSamplingRateInput.setSuffix(" fmax")
-        self.normSamplingRateInput.setRange(0,4)
+        self.normSamplingRateInput.setRange(0, 4)
 
+        # Update normalized sampling rate input when the slider is changed
         self.samplingSlider.valueChanged.connect(lambda value: self.normSamplingRateInput.setValue(value / 100.0))
-        self.normSamplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value * 100)))
-        self.normSamplingRateInput.valueChanged.connect(lambda: self.samplingRateInput.setValue(self.signalfMax * self.normSamplingRateInput.value()))
-        self.samplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value / self.signalfMax * 100)) if self.signalfMax else None)
-        self.samplingRateInput.valueChanged.connect(self.on_sampling_rate_changed)
 
+        # Update slider when the normalized sampling rate input is changed
+        self.normSamplingRateInput.valueChanged.connect(lambda value: self.samplingSlider.setValue(int(value * 100)))
+
+        # Update sampling rate input when normalized sampling rate input is changed
+        self.normSamplingRateInput.valueChanged.connect(
+            lambda: self.samplingRateInput.setValue(self.signalfMax * self.normSamplingRateInput.value())
+        )
+
+        # Update slider when the sampling rate input is changed
+        self.samplingRateInput.valueChanged.connect(
+            lambda value: self.samplingSlider.setValue(int(value / self.signalfMax * 100)) if self.signalfMax else None
+        )
+        self.samplingRateInput.valueChanged.connect(self.on_sampling_rate_changed)
 
         self.controlBar.dataLoaded.connect(self.composer.clear_table)
         # self.composer.setStyleSheet("background:blue;")
@@ -182,18 +203,16 @@ class MainApp(QMainWindow):
         self.mainLayout.addLayout(self.composerLayout, 15)
 
         self.controlBarLayout.addWidget(self.controlBar)
-        #self.composerLayout.addWidget(self.composer)
+        # self.composerLayout.addWidget(self.composer)
         # Adding the SNR and sampling sliders to the composerLayout
 
         # horizontal layout for the 2 fields of sampling values
         samplingRateInputLayout = QHBoxLayout()
-        samplingRateInputLayout.addWidget(self.samplingRateInput)    
-        #samplingRateInputLayout.addStretch(10)    
+        samplingRateInputLayout.addWidget(self.samplingRateInput)
+        # samplingRateInputLayout.addStretch(10)
         samplingRateInputLayout.addWidget(self.normSamplingRateInput)
 
-        self.samplingRateLabel.setStyleSheet(labelOnStyle)
-
-        #self.composerLayout.addSpacing(10)
+        # self.composerLayout.addSpacing(10)
         self.composerLayout.addWidget(self.samplingRateLabel)
         self.composerLayout.addSpacing(10)
         self.composerLayout.addWidget(self.samplingSlider)
@@ -247,7 +266,6 @@ class MainApp(QMainWindow):
     def on_snr_changed(self, value):
         self.snrChanged.emit(value / 1.0)
 
-
     def on_snr_enabled_changed(self, state):
         is_enabled = state == Qt.Checked
         self.snrEnabledChanged.emit(is_enabled)
@@ -264,7 +282,6 @@ class MainApp(QMainWindow):
             self.snrInput.setStyleSheet(numberInputOffStyle)
             self.snrEnable.setStyleSheet(labelOffStyle)
 
-
     def sync_pan(self, plot_widget):
 
         if self.is_panning:
@@ -272,7 +289,6 @@ class MainApp(QMainWindow):
 
         self.is_panning = True
         time_min, time_max = plot_widget.viewRange()[0]
-
 
         if plot_widget != self.originalSignal:
             self.originalSignal.setXRange(time_min, time_max, padding=0)
@@ -283,7 +299,7 @@ class MainApp(QMainWindow):
         if plot_widget != self.diffrenceGraph:
             self.diffrenceGraph.setXRange(time_min, time_max, padding=0)
 
-
+        self.originalSignal.setXRange(7, 13)
         self.is_panning = False
 
     def limit_x_axis(self, plot_widget):
@@ -338,23 +354,20 @@ class MainApp(QMainWindow):
         self.plot_frequency_domain(self.noisy_amplitude, time_step)
 
     def generate_default_data(self):  # testing
-        time = np.linspace(0, 1, 1000)
+        time = np.linspace(0, 20, 2500)
         amplitude = np.sin(2 * np.pi * 10 * time)
         return np.column_stack((time, amplitude))
 
     def updateSamplingRate(self, samplingRate):
         self.sampling_rate = int(samplingRate)
-        print(samplingRate)
-        print(self.sampling_rate)
+
         try:
             self.updateSignalData(self.signalData)
         except Exception as e:
             print(f"An error occurred while updating signal data: {e}")
 
     def updateSamplingMethod(self, method):
-        print(method)
         self.interp_method = self.interp_methods[method]
-        print(self.interp_method)
         self.updateSignalData(self.signalData)
 
     def updateSignalData(self, data):
@@ -384,8 +397,6 @@ class MainApp(QMainWindow):
             self.reconstructedSignal.plot(time, reconstructed_amplitude, pen=mkPen(color="b", width=2),
                                           name="Reconstructed Signal")
 
-            print("Signal Data Updated:")
-            print(self.signalData)
             self.diffrenceGraph.clear()
             if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.ndim == 1:
                 difference = calculate_difference(self.signalData[:, 1], reconstructed_amplitude)
@@ -401,11 +412,10 @@ class MainApp(QMainWindow):
                 # self.diffrenceGraph.addItem(meanSquareError_item)
                 self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2),
                                          name=f"Difference graph with Error: {meanError:.4f}")
+                self.diffrenceGraph.setYRange(-5, 5, padding=1)
+                self.originalSignal.setXRange(7, 13)
 
             self.plot_frequency_domain(amplitude, self.signalData[1, 0] - self.signalData[0, 0])
-
-        print("fmaxxxx")
-        print(self.signalfMax)
 
         self.controlBar.signalfMax = self.signalfMax
 
@@ -444,8 +454,6 @@ class MainApp(QMainWindow):
         original_positive_frequencies = original_fft_frequencies[:reconstructed_length // 2]
         original_magnitudes = np.abs(original_fft_values[:reconstructed_length // 2])
 
-        print("noo")
-        print(len(self.reconstructedSignalData))
         reconstructed_fft_values = np.fft.fft(self.reconstructedSignalData)
         reconstructed_fft_frequencies = np.fft.fftfreq(reconstructed_length, d=time_step)
         reconstructed_positive_frequencies = reconstructed_fft_frequencies[:reconstructed_length // 2]
@@ -457,22 +465,19 @@ class MainApp(QMainWindow):
         self.frequencyDomain.plot(-1 * reconstructed_positive_frequencies, reconstructed_magnitudes,
                                   pen=mkPen(color="#a000c8", width=2))
 
-        self.frequencyDomain.plot( reconstructed_positive_frequencies + self.sampling_rate, reconstructed_magnitudes,
+        self.frequencyDomain.plot(reconstructed_positive_frequencies + self.sampling_rate, reconstructed_magnitudes,
                                   pen=mkPen(color=(0, 0, 255, 150), width=2), name=" Signals due to periodicity")
-        self.frequencyDomain.plot( -reconstructed_positive_frequencies + self.sampling_rate, reconstructed_magnitudes,
+        self.frequencyDomain.plot(-reconstructed_positive_frequencies + self.sampling_rate, reconstructed_magnitudes,
                                   pen=mkPen(color=(0, 0, 255, 150), width=2), )
 
-        self.frequencyDomain.plot( reconstructed_positive_frequencies - self.sampling_rate, reconstructed_magnitudes,
+        self.frequencyDomain.plot(reconstructed_positive_frequencies - self.sampling_rate, reconstructed_magnitudes,
                                   pen=mkPen(color=(0, 0, 255, 150), width=2))
-        self.frequencyDomain.plot( -reconstructed_positive_frequencies - self.sampling_rate, reconstructed_magnitudes,
+        self.frequencyDomain.plot(-reconstructed_positive_frequencies - self.sampling_rate, reconstructed_magnitudes,
                                   pen=mkPen(color=(0, 0, 255, 150), width=2), )
 
         threshold = 0.1 * np.max(original_magnitudes)  # Adjust threshold as needed
         significant_frequencies = original_positive_frequencies[original_magnitudes > threshold]
         self.signalfMax = np.max(significant_frequencies)
-
-        print("from fourier")
-        print(self.signalfMax)
 
         max_frequency = np.max(original_positive_frequencies) * 0.5
         max_magnitude = np.max(original_magnitudes)
@@ -503,6 +508,11 @@ class MainApp(QMainWindow):
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=2),
                                  name="Noisy Mixed Signal")
         time_step = self.signalData[1, 0] - self.signalData[0, 0]
+
+        self.diffrenceGraph.clear()
+        difference = self.calculate_difference(self.signalData[:, 1], self.reconstructedSignalData)
+        meanError = np.mean(difference)
+
         self.plot_frequency_domain(mixed_signal, time_step)
 
     def update_table_mixed_signal(self, row, amplitude, frequency, signal_type):
@@ -562,19 +572,6 @@ class MainApp(QMainWindow):
         self.composer.clear_table()
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
         self.data_loader = None
-
-    def resizeEvent(self, event):
-        print(f"Window resized: {self.width()} x {self.height()}")
-        threshold_width = 1700
-        if self.width() < threshold_width:
-            self.snrSlider.setOrientation(Qt.Vertical)
-            self.samplingSlider.setOrientation(Qt.Vertical)
-        else:
-            self.snrSlider.setOrientation(Qt.Horizontal)
-            self.samplingSlider.setOrientation(Qt.Horizontal)
-
-        self.controlBar.update()
-        super().resizeEvent(event)
 
 
 if __name__ == "__main__":
