@@ -68,8 +68,8 @@ def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
     sampled_signal = []
 
     # Process the data in cycles of 250 points
-    for startpoint in range(0, len(time), 125):
-        endpoint = min(startpoint + 125, len(time))
+    for startpoint in range(0, len(time), 25):
+        endpoint = min(startpoint + 25, len(time))
 
         # Sample the indices within this segment based on sampling rate
         sample_indices = np.linspace(startpoint, endpoint - 1, sampling_rate).astype(int)
@@ -89,6 +89,7 @@ def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
 
 
 def calculate_difference(original_signal, reconstructed_signal):
+
     return np.abs(original_signal - reconstructed_signal)
 
 

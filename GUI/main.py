@@ -327,7 +327,7 @@ class MainApp(QMainWindow):
         self.reconstructedSignal.clear()
 
         self.reconstructedSignal.plot(time, noisy_signal_reconstructed, pen=mkPen(color="b", width=2),
-                                      name="Original Signal")
+                                      name="Reconstructed Signal")
         self.diffrenceGraph.clear()
         noise_difference = calculate_difference(self.signalData[:, 1], noisy_signal_reconstructed)
         meanError = np.mean(noise_difference)
@@ -338,8 +338,8 @@ class MainApp(QMainWindow):
         self.plot_frequency_domain(self.noisy_amplitude, time_step)
 
     def generate_default_data(self):  # testing
-        time = np.linspace(0, 1, 1000)
-        amplitude = np.sin(2 * np.pi * 10 * time)
+        time = np.linspace(0, 20, 500)
+        amplitude = np.sin(2 * np.pi * 5 * time)
         return np.column_stack((time, amplitude))
 
     def updateSamplingRate(self, samplingRate):
@@ -388,9 +388,12 @@ class MainApp(QMainWindow):
             print(self.signalData)
             self.diffrenceGraph.clear()
             if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.ndim == 1:
+                print("ttttt")
+                print(self.signalData[:5,1])
+                print(reconstructed_amplitude[:5])
                 difference = calculate_difference(self.signalData[:, 1], reconstructed_amplitude)
-
-                meanError = np.mean(difference)
+                print(difference[:5])
+                meanError = np.mean(np.abs(difference))
                 # meanSquareError_text = f"Error: {meanSquareError:.4f}"
 
                 # meanSquareError_item = TextItem(meanSquareError_text, anchor=(0, 1), color='w')
@@ -401,6 +404,7 @@ class MainApp(QMainWindow):
                 # self.diffrenceGraph.addItem(meanSquareError_item)
                 self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2),
                                          name=f"Difference graph with Error: {meanError:.4f}")
+                self.diffrenceGraph.setYRange(-5,5,padding=1)
 
             self.plot_frequency_domain(amplitude, self.signalData[1, 0] - self.signalData[0, 0])
 
