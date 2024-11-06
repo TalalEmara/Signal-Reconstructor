@@ -365,22 +365,35 @@ class MainApp(QMainWindow):
         if self.signalData.shape[1] >= 2:
             time = self.signalData[:, 0]
             amplitude = self.signalData[:, 1]
+
+            # Only apply noise if snr_enabled is True and signal hasn't been noisy already
+            if self.snr_enabled and not hasattr(self, 'noisy_signal_applied'):
+                self.noisy_amplitude = add_noise(amplitude, snr_value)
+                self.noisy_signal_applied = True
+            elif not self.snr_enabled:
+                self.noisy_signal_applied = False
+                self.noisy_amplitude = amplitude
+            else:
+                # If snr_enabled is True but the signal has already been noisy, keep the noisy signal unchanged
+                self.noisy_amplitude = self.noisy_amplitude
+
             self.sampledTime, self.sampledSignal, self.reconstructedSignalData = sample_and_reconstruct(
-                time, amplitude, self.sampling_rate, self.interp_method)
+                time, self.noisy_amplitude, self.sampling_rate, self.interp_method)
             reconstructed_amplitude = self.reconstructedSignalData
+
             self.originalSignal.clear()
             self.reconstructedSignal.clear()
+
+            # Plot the noisy signal if snr_enabled
             if self.snr_enabled:
-                amplitude = add_noise(amplitude, snr_value)
-                # self.originalSignal.plot(time, noisy_signal, pen=mkPen(color="r", width=2), name="Noisy Signal")
-                self.sampledTime, self.sampledSignal, reconstructed_amplitude = sample_and_reconstruct(
-                    time, amplitude, self.sampling_rate, self.interp_method)
-                self.originalSignal.plot(time, amplitude, pen=mkPen(color="#a000c8", width=2), name="Original Signal")
+                self.originalSignal.plot(time, self.noisy_amplitude, pen=mkPen(color="#a000c8", width=2),
+                                         name="Original Signal With Noise")
             else:
                 self.originalSignal.plot(time, amplitude, pen=mkPen(color="#a000c8", width=2), name="Original Signal")
 
             self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
                                      symbolBrush='w')
+
             self.reconstructedSignal.plot(time, reconstructed_amplitude, pen=mkPen(color="b", width=2),
                                           name="Reconstructed Signal")
 
@@ -389,24 +402,16 @@ class MainApp(QMainWindow):
             self.diffrenceGraph.clear()
             if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.ndim == 1:
                 print("ttttt")
-                print(self.signalData[:5,1])
+                print(self.signalData[:5, 1])
                 print(reconstructed_amplitude[:5])
                 difference = calculate_difference(self.signalData[:, 1], reconstructed_amplitude)
                 print(difference[:5])
                 meanError = np.mean(np.abs(difference))
-                # meanSquareError_text = f"Error: {meanSquareError:.4f}"
-
-                # meanSquareError_item = TextItem(meanSquareError_text, anchor=(0, 1), color='w')
-
-                # max_difference = np.max(difference)
-                # meanSquareError_item.setPos(0, max_difference * 0.9)
-
-                # self.diffrenceGraph.addItem(meanSquareError_item)
                 self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2),
                                          name=f"Difference graph with Error: {meanError:.4f}")
-                self.diffrenceGraph.setYRange(-5,5,padding=1)
+                self.diffrenceGraph.setYRange(-5, 5, padding=1)
 
-            self.plot_frequency_domain(amplitude, self.signalData[1, 0] - self.signalData[0, 0])
+            self.plot_frequency_domain(self.noisy_amplitude, self.signalData[1, 0] - self.signalData[0, 0])
 
         print("fmaxxxx")
         print(self.signalfMax)
