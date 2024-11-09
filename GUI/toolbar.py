@@ -22,7 +22,7 @@ class ToolBar(QWidget):
 
         self.signalName = "Default Signal"
         self.signalData = []
-        self.signalfMax = 100
+        # self.signalfMax = 100
 
         self.title = QLabel("ReSigni | ")
         self.title.setStyleSheet(TitleStyle)

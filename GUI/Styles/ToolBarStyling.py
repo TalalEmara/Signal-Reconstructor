@@ -96,7 +96,7 @@ sliderOffStyle = """
 """
 
 numberInputOnStyle = """
-    QDoubleSpinBox{
+    QSpinBox{
         color: #2252A0;
         padding:2px;
         border: 2px solid #2252A0;
