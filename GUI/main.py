@@ -343,7 +343,7 @@ class MainApp(QMainWindow):
         self.reconstructedSignal.clear()
 
         self.reconstructedSignal.plot(time, noisy_signal_reconstructed, pen=mkPen(color="b", width=2),
-                                      name="Original Signal")
+                                      name="Reconstructed Signal")
         self.diffrenceGraph.clear()
         noise_difference = calculate_difference(self.signalData[:, 1], noisy_signal_reconstructed)
         meanError = np.mean(noise_difference)
@@ -356,6 +356,8 @@ class MainApp(QMainWindow):
     def generate_default_data(self):  # testing
         time = np.linspace(0, 20, 2500)
         amplitude = np.sin(2 * np.pi * 10 * time)
+        time = np.linspace(0, 20, 500)
+        amplitude = np.sin(2 * np.pi * 5 * time)
         return np.column_stack((time, amplitude))
 
     def updateSamplingRate(self, samplingRate):
@@ -378,46 +380,55 @@ class MainApp(QMainWindow):
         if self.signalData.shape[1] >= 2:
             time = self.signalData[:, 0]
             amplitude = self.signalData[:, 1]
+
+            # Only apply noise if snr_enabled is True and signal hasn't been noisy already
+            if self.snr_enabled and not hasattr(self, 'noisy_signal_applied'):
+                self.noisy_amplitude = add_noise(amplitude, snr_value)
+                self.noisy_signal_applied = True
+            elif not self.snr_enabled:
+                self.noisy_signal_applied = False
+                self.noisy_amplitude = amplitude
+            else:
+                # If snr_enabled is True but the signal has already been noisy, keep the noisy signal unchanged
+                self.noisy_amplitude = self.noisy_amplitude
+
             self.sampledTime, self.sampledSignal, self.reconstructedSignalData = sample_and_reconstruct(
-                time, amplitude, self.sampling_rate, self.interp_method)
+                time, self.noisy_amplitude, self.sampling_rate, self.interp_method)
             reconstructed_amplitude = self.reconstructedSignalData
+
             self.originalSignal.clear()
             self.reconstructedSignal.clear()
+
+            # Plot the noisy signal if snr_enabled
             if self.snr_enabled:
-                amplitude = add_noise(amplitude, snr_value)
-                # self.originalSignal.plot(time, noisy_signal, pen=mkPen(color="r", width=2), name="Noisy Signal")
-                self.sampledTime, self.sampledSignal, reconstructed_amplitude = sample_and_reconstruct(
-                    time, amplitude, self.sampling_rate, self.interp_method)
-                self.originalSignal.plot(time, amplitude, pen=mkPen(color="#a000c8", width=2), name="Original Signal")
+                self.originalSignal.plot(time, self.noisy_amplitude, pen=mkPen(color="#a000c8", width=2),
+                                         name="Original Signal With Noise")
             else:
                 self.originalSignal.plot(time, amplitude, pen=mkPen(color="#a000c8", width=2), name="Original Signal")
 
             self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
                                      symbolBrush='w')
+
             self.reconstructedSignal.plot(time, reconstructed_amplitude, pen=mkPen(color="b", width=2),
                                           name="Reconstructed Signal")
 
             self.diffrenceGraph.clear()
             if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.ndim == 1:
+                print("ttttt")
+                print(self.signalData[:5, 1])
+                print(reconstructed_amplitude[:5])
                 difference = calculate_difference(self.signalData[:, 1], reconstructed_amplitude)
-
-                meanError = np.mean(difference)
-                # meanSquareError_text = f"Error: {meanSquareError:.4f}"
-
-                # meanSquareError_item = TextItem(meanSquareError_text, anchor=(0, 1), color='w')
-
-                # max_difference = np.max(difference)
-                # meanSquareError_item.setPos(0, max_difference * 0.9)
-
-                # self.diffrenceGraph.addItem(meanSquareError_item)
+                print(difference[:5])
+                meanError = np.mean(np.abs(difference))
                 self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2),
                                          name=f"Difference graph with Error: {meanError:.4f}")
                 self.diffrenceGraph.setYRange(-5, 5, padding=1)
-                self.originalSignal.setXRange(7, 13)
 
-            self.plot_frequency_domain(amplitude, self.signalData[1, 0] - self.signalData[0, 0])
 
-        self.controlBar.signalfMax = self.signalfMax
+            self.originalSignal.setXRange(7, 13)
+            self.plot_frequency_domain(self.noisy_amplitude, self.signalData[1, 0] - self.signalData[0, 0])
+
+            self.controlBar.signalfMax = self.signalfMax
 
     def calculate_difference(self, originalSignal, reconstructedSignalData):
         length = max(len(originalSignal), len(reconstructedSignalData))
@@ -490,23 +501,64 @@ class MainApp(QMainWindow):
         # self.frequencyDomain.setXRange(-max_frequency * 1.1, max_frequency * 1.1, padding=0.05)
         # self.frequencyDomain.setYRange(0, max_magnitude * 1.1, padding=0.05)
 
+    # def add_mixed_signal(self, amplitude, frequency, signal_type):
+    #     self.old_amplitude = amplitude
+    #     self.old_frequency = frequency
+    #     self.old_type = signal_type
+
+    #     mixed_signal = mixer(self.signalData, amplitude, frequency, signal_type)
+
+    #     self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal))
+    #     self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
+    #                              symbolBrush='w')
+    #     self.updateSignalData(self.signalData)
+
+    #     snr_value = self.snrSlider.value()
+    #     noisy_signal = add_noise(mixed_signal, snr_value) if self.snr_enabled else mixed_signal
+
+    #     self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=2),
+    #                              name="Noisy Mixed Signal")
+    #     time_step = self.signalData[1, 0] - self.signalData[0, 0]
+    #     self.plot_frequency_domain(mixed_signal, time_step)
+
     def add_mixed_signal(self, amplitude, frequency, signal_type):
+        # Only proceed if amplitude, frequency, or signal type has actually changed
+        if (amplitude, frequency, signal_type) == (self.old_amplitude, self.old_frequency, self.old_type):
+            return  # Skip redundant updates
+
+        # Update cached signal parameters
         self.old_amplitude = amplitude
         self.old_frequency = frequency
         self.old_type = signal_type
 
+        # Generate the mixed signal only if parameters have changed
         mixed_signal = mixer(self.signalData, amplitude, frequency, signal_type)
-
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal))
+
+        # Clear and plot the sampled signal
+        self.originalSignal.clear()
         self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
-                                 symbolBrush='w')
+                                symbolBrush='w')
+
+        # Update signal data with newly mixed signal
         self.updateSignalData(self.signalData)
 
+        # Check if noise addition is necessary based on SNR and snr_enabled status
         snr_value = self.snrSlider.value()
-        noisy_signal = add_noise(mixed_signal, snr_value) if self.snr_enabled else mixed_signal
+        if self.snr_enabled and not hasattr(self, 'noisy_signal_applied'):
+            noisy_signal = add_noise(mixed_signal, snr_value)
+            self.noisy_signal_applied = True
+        elif not self.snr_enabled:
+            self.noisy_signal_applied = False
+            noisy_signal = mixed_signal
+        else:
+            noisy_signal = self.noisy_amplitude  # Reuse previous noisy signal if unchanged
 
+        # Plot noisy signal, avoiding redundant plotting
         self.originalSignal.plot(self.signalData[:, 0], noisy_signal, pen=mkPen(color="r", width=2),
-                                 name="Noisy Mixed Signal")
+                                name="Noisy Mixed Signal")
+
+        # Compute FFT for frequency domain visualization only if signal data is modified
         time_step = self.signalData[1, 0] - self.signalData[0, 0]
 
         self.diffrenceGraph.clear()
@@ -514,6 +566,7 @@ class MainApp(QMainWindow):
         meanError = np.mean(difference)
 
         self.plot_frequency_domain(mixed_signal, time_step)
+
 
     def update_table_mixed_signal(self, row, amplitude, frequency, signal_type):
         old_signal = remove_elements(self.signalData, self.old_amplitude, self.old_frequency, self.old_type)
