@@ -120,6 +120,16 @@ class MainApp(QMainWindow):
             )
         )
 
+        self.snrEnabledChanged.connect(self.updateNoise)
+        self.snrChanged.connect(self.updateNoise)
+
+        #repeatition!!!
+        self.snrSlider.valueChanged.connect(lambda value: self.snrInput.setValue(value / 1.0))  # Convert to float
+        self.snrInput.valueChanged.connect(lambda value: self.snrSlider.setValue(int(value)))
+        self.snrSlider.valueChanged.connect(self.on_snr_changed)
+        self.snrEnable.stateChanged.connect(self.on_snr_enabled_changed)
+        # self.snrChanged.connect(self.updateNoise)
+
         # limit x
         # self.originalSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.originalSignal))
         # self.reconstructedSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.reconstructedSignal))
@@ -170,10 +180,8 @@ class MainApp(QMainWindow):
         self.setWindowState(Qt.WindowMaximized)
         self.setStyleSheet("background-color: #f0f1f5;")
 
-        # self.controlBar.setStyleSheet("background:red;")
 
-        self.snrEnabledChanged.connect(self.set_snr_enabled)
-        self.snrChanged.connect(self.updateNoise)
+
 
 
 
@@ -184,10 +192,7 @@ class MainApp(QMainWindow):
 
 
 
-        self.snrSlider.valueChanged.connect(lambda value: self.snrInput.setValue(value / 1.0))  # Convert to float
-        self.snrInput.valueChanged.connect(lambda value: self.snrSlider.setValue(int(value)))
-        self.snrSlider.valueChanged.connect(self.on_snr_changed)
-        self.snrEnable.stateChanged.connect(self.on_snr_enabled_changed)
+
         #
         # self.samplingSlider.setValue(int(200 / self.signalfMax))
 
@@ -345,43 +350,44 @@ class MainApp(QMainWindow):
 
         plot_widget.setXRange(time_min, time_max, padding=0)
 
-    def set_snr_enabled(self, enabled):
-        self.snr_enabled = enabled
-        self.updateSignalData(self.signalData)
-        self.updateNoise(self.snrSlider.value())
-
-    def updateNoise(self, snr_value):
+    def updateNoise(self, enabled):
         if not self.snr_enabled:
-            return
+            self.snr_enabled = enabled
+        self.updateSignalData(self.signalData)
+        # self.updateNoise(self.snrSlider.value())
 
-        time = self.signalData[:, 0]
-        amplitude = self.signalData[:, 1]
-
-        self.noisy_amplitude = add_noise(amplitude, snr_value)
-
-        self.sampledTime, self.sampledSignal, self.reconstructedSignalData = sample_and_reconstruct(
-            self.signalData[:, 0], self.noisy_amplitude, self.sampling_rate, self.interp_method)
-
-        noisy_signal_reconstructed = self.reconstructedSignalData
-
-        self.originalSignal.clear()
-
-        self.originalSignal.plot(time, self.noisy_amplitude, pen=mkPen(color="#a000c8", width=2),
-                                 name="Original Signal With Noise")
-        self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
-                                 symbolBrush='w')
-        self.reconstructedSignal.clear()
-
-        self.reconstructedSignal.plot(time, noisy_signal_reconstructed, pen=mkPen(color="b", width=2),
-                                      name="Reconstructed Signal")
-        self.diffrenceGraph.clear()
-        noise_difference = calculate_difference(self.signalData[:, 1], noisy_signal_reconstructed)
-        meanError = np.mean(noise_difference)
-        self.diffrenceGraph.plot(time, noise_difference, pen=mkPen(color="r", width=2),
-                                 name=f"Difference graph with Error: {meanError:.4f}")
-        time_step = time[1] - time[0]
-        self.frequencyDomain.clear()
-        self.plot_frequency_domain(self.noisy_amplitude, time_step)
+    # def updateNoise(self, snr_value):
+    #     if not self.snr_enabled:
+    #         return
+    #
+    #     time = self.signalData[:, 0]
+    #     amplitude = self.signalData[:, 1]
+    #
+    #     self.noisy_amplitude = add_noise(amplitude, snr_value)
+    #
+    #     self.sampledTime, self.sampledSignal, self.reconstructedSignalData = sample_and_reconstruct(
+    #         self.signalData[:, 0], self.noisy_amplitude, self.sampling_rate, self.interp_method)
+    #
+    #     noisy_signal_reconstructed = self.reconstructedSignalData
+    #
+    #     self.originalSignal.clear()
+    #
+    #     self.originalSignal.plot(time, self.noisy_amplitude, pen=mkPen(color="#a000c8", width=2),
+    #                              name="Original Signal With Noise")
+    #     self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
+    #                              symbolBrush='w')
+    #     self.reconstructedSignal.clear()
+    #
+    #     self.reconstructedSignal.plot(time, noisy_signal_reconstructed, pen=mkPen(color="b", width=2),
+    #                                   name="Reconstructed Signal")
+    #     self.diffrenceGraph.clear()
+    #     noise_difference = calculate_difference(self.signalData[:, 1], noisy_signal_reconstructed)
+    #     meanError = np.mean(noise_difference)
+    #     self.diffrenceGraph.plot(time, noise_difference, pen=mkPen(color="r", width=2),
+    #                              name=f"Difference graph with Error: {meanError:.4f}")
+    #     time_step = time[1] - time[0]
+    #     self.frequencyDomain.clear()
+    #     self.plot_frequency_domain(self.noisy_amplitude, time_step)
 
     def generate_default_data(self):  # testing
         time = np.linspace(0, 10, 5000)
@@ -405,6 +411,7 @@ class MainApp(QMainWindow):
         self.signalfMax = calculate_max_frequency(self.signalData[:, 1], self.signalData[:, 0])
 
         snr_value = self.snrSlider.value()
+
         if self.signalData.shape[1] >= 2:
             time = self.signalData[:, 0]
             amplitude = self.signalData[:, 1]
@@ -422,19 +429,14 @@ class MainApp(QMainWindow):
 
             self.reconstructedSignal.plot(time, reconstructed_amplitude, pen=mkPen(color="#a000c8", width=2),name="Reconstructed Signal")
 
-            if self.signalData.shape[1] >= 2 and self.reconstructedSignalData.ndim == 1:
-                print("ttttt")
-                print(self.signalData[:5, 1])
-                print(reconstructed_amplitude[:5])
-                difference = calculate_difference(self.signalData[:, 1], reconstructed_amplitude)
 
+            difference = calculate_difference(self.signalData[:, 1], reconstructed_amplitude)
+            self.diffrenceGraph.clear()
+            self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2))
 
-                self.diffrenceGraph.clear()
-                self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2))
+            # self.diffrenceGraph.setYRange(-5, 5, padding=1)
 
-                self.diffrenceGraph.setYRange(-5, 5, padding=1)
-
-            self.plot_frequency_domain(amplitude, self.signalData[1, 0] - self.signalData[0, 0])
+            self.plot_frequency_domain(reconstructed_amplitude, self.signalData[1, 0] - self.signalData[0, 0])
     def calculate_difference(self, originalSignal, reconstructedSignalData):
         length = max(len(originalSignal), len(reconstructedSignalData))
         padded_originalSignal = np.pad(originalSignal, (0, length - len(originalSignal)), 'constant')
@@ -443,8 +445,8 @@ class MainApp(QMainWindow):
         return padded_originalSignal - padded_reconstructedSignalData
 
 
-    def plot_frequency_domain(self, original_amplitude, time_step):
-        reconstructed_length = len(original_amplitude)
+    def plot_frequency_domain(self, amplitude, time_step):
+        reconstructed_length = len(amplitude)
         #
         # original_fft_values = np.fft.fft(original_amplitude)
         # original_fft_frequencies = np.fft.fftfreq(reconstructed_length, d=time_step)
@@ -452,7 +454,7 @@ class MainApp(QMainWindow):
         # original_positive_frequencies = original_fft_frequencies[:reconstructed_length // 2]
         # original_magnitudes = np.abs(original_fft_values[:reconstructed_length // 2])
 
-        reconstructed_fft_values = np.fft.fft(self.reconstructedSignalData[:,1])
+        reconstructed_fft_values = np.fft.fft(amplitude)
         reconstructed_fft_frequencies = np.fft.fftfreq(reconstructed_length, d=time_step)
         reconstructed_positive_frequencies = reconstructed_fft_frequencies[:reconstructed_length // 2]
         reconstructed_magnitudes = np.abs(reconstructed_fft_values[:reconstructed_length // 2])
@@ -525,9 +527,9 @@ class MainApp(QMainWindow):
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal))
 
         # Clear and plot the sampled signal
-        self.originalSignal.clear()
-        self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
-                                symbolBrush='w')
+        # self.originalSignal.clear()
+        # self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
+        #                         symbolBrush='w')
 
         # Update signal data with newly mixed signal
         self.updateSignalData(self.signalData)
