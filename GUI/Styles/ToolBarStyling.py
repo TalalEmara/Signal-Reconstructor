@@ -95,8 +95,17 @@ sliderOffStyle = """
             }
 """
 
-numberInputOnStyle = """
+samplingRateInputOnStyle = """
     QSpinBox{
+        color: #2252A0;
+        padding:2px;
+        border: 2px solid #2252A0;
+        border-radius: 5px;  
+    }
+    """
+
+DoubleInputOnStyle = """
+    QDoubleSpinBox{
         color: #2252A0;
         padding:2px;
         border: 2px solid #2252A0;
@@ -104,6 +113,7 @@ numberInputOnStyle = """
     }
     
 """
+
 numberInputOffStyle = """
             QDoubleSpinBox {
                 color: gray;

@@ -13,7 +13,7 @@ from Core.noise import add_noise
 from Core.mainCore import sample_and_reconstruct, sinc_interp, linear_interp, calculate_max_frequency, \
     zoh_reconstruction, cubic_spline_interp, calculate_difference
 from Styles.ToolBarStyling import sliderOnStyle, \
-    sliderOffStyle, labelOffStyle, labelOnStyle, numberInputOffStyle, numberInputOnStyle
+    sliderOffStyle, labelOffStyle, labelOnStyle, numberInputOffStyle, samplingRateInputOnStyle, DoubleInputOnStyle
 
 
 class MainApp(QMainWindow):
@@ -49,8 +49,8 @@ class MainApp(QMainWindow):
     def createUI(self):
         self.createUIElements()
         self.stylingUI()
-        self.linkingUI()
         self.settingUI()
+        self.linkingUI()
         print("Created UI")
 
     def createUIElements(self):
@@ -84,13 +84,13 @@ class MainApp(QMainWindow):
         self.samplingRateLabel.setStyleSheet("""font-family: 'Samsung Sans'; font-size: 14px; font-weight: 600; color: #2252A0;""")
         self.samplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
         self.samplingRateInput.setAlignment(Qt.AlignCenter)
-        self.samplingRateInput.setStyleSheet(numberInputOnStyle)
+        self.samplingRateInput.setStyleSheet(samplingRateInputOnStyle)
         self.samplingRateInput.setSuffix("Hz")
 
         self.samplingSlider.setStyleSheet(sliderOnStyle)
         self.normSamplingRateInput.setButtonSymbols(QDoubleSpinBox.NoButtons)
         self.normSamplingRateInput.setAlignment(Qt.AlignCenter)
-        self.normSamplingRateInput.setStyleSheet(numberInputOnStyle)
+        self.normSamplingRateInput.setStyleSheet(DoubleInputOnStyle)
         self.normSamplingRateInput.setSuffix(" fmax")
         self.originalSignal.setLabel('left', 'Amplitude')
         self.originalSignal.setLabel('bottom', 'Time', units='s')
@@ -310,7 +310,7 @@ class MainApp(QMainWindow):
 
         if is_enabled:
             self.snrSlider.setStyleSheet(sliderOnStyle)
-            self.snrInput.setStyleSheet(numberInputOnStyle)
+            self.snrInput.setStyleSheet(DoubleInputOnStyle)
             self.snrEnable.setStyleSheet(labelOnStyle)
         else:
             self.snrSlider.setStyleSheet(sliderOffStyle)
@@ -527,9 +527,9 @@ class MainApp(QMainWindow):
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal))
 
         # Clear and plot the sampled signal
-        # self.originalSignal.clear()
-        # self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
-        #                         symbolBrush='w')
+        self.originalSignal.clear()
+        self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,
+                                symbolBrush='w')
 
         # Update signal data with newly mixed signal
         self.updateSignalData(self.signalData)
