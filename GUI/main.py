@@ -36,7 +36,7 @@ class MainApp(QMainWindow):
         # self.signalData = self.data_loader.get_data()
         self.signalData = self.generate_default_data()
         # self.signalfMax = calculate_max_frequency(self.signalData[:, 1], self.signalData[:, 0])
-        self.signalfMax = 12
+        self.signalfMax = 5
         self.sampling_rate = 13
         self.mixedSignalData = None
         self.reconstructedSignalData = self.signalData
@@ -103,7 +103,8 @@ class MainApp(QMainWindow):
 
     def linkingUI(self):
         self.controlBar.dataLoaded.connect(self.updateSignalData)
-        self.controlBar.dataLoaded.connect(lambda data: self.updateSignalData(data.to_numpy()))
+        self.controlBar.dataLoaded.connect(lambda data: (self.updateSignalData(data.to_numpy()), self.updateFrequency(data.to_numpy())))
+
 
         self.controlBar.dataLoaded.connect(self.composer.clear_table)
         self.controlBar.methodChanged.connect(self.updateSamplingMethod)
@@ -408,7 +409,7 @@ class MainApp(QMainWindow):
 
     def updateSignalData(self, data):
         self.signalData = np.array(data)
-        self.signalfMax = calculate_max_frequency(self.signalData[:, 1], self.signalData[:, 0])
+        # self.signalfMax = calculate_max_frequency(self.signalData[:, 1], self.signalData[:, 0])
 
         snr_value = self.snrSlider.value()
 
@@ -525,6 +526,7 @@ class MainApp(QMainWindow):
         # Generate the mixed signal only if parameters have changed
         mixed_signal = mixer(self.signalData, amplitude, frequency, signal_type)
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal))
+        self.updateFrequency(self.signalData)
 
         # Clear and plot the sampled signal
         self.originalSignal.clear()
@@ -584,7 +586,7 @@ class MainApp(QMainWindow):
         old_signal = remove_elements(self.signalData, amplitude, frequency, signal_type)
 
         self.signalData = np.column_stack((self.signalData[:, 0], old_signal))
-
+        self.updateFrequency(self.signalData)
         self.originalSignal.clear()
 
         self.originalSignal.plot(self.signalData[:, 0], old_signal, pen=mkPen(color="#a000c8", width=2),
@@ -617,6 +619,20 @@ class MainApp(QMainWindow):
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
         self.data_loader = None
 
+    def updateFrequency(self, signal_data):
+        amplitude= signal_data[:, 1]
+        amplitude_length= len(amplitude)
+
+        time_step = self.signalData[1, 0] - self.signalData[0, 0]
+        original_fft_values = np.fft.fft(amplitude)
+        original_fft_frequencies = np.fft.fftfreq(amplitude_length, d=time_step)
+
+        original_positive_frequencies = original_fft_frequencies[:amplitude_length // 2]
+        original_magnitudes = np.abs(original_fft_values[:amplitude_length // 2])
+        threshold = 0.1 * np.max(original_magnitudes)  # Adjust threshold as needed
+        significant_frequencies = original_positive_frequencies[original_magnitudes > threshold]
+        self.signalfMax = np.max(significant_frequencies)
+        print(self.signalfMax)
 
 if __name__ == "__main__":
     csv_file_path = 'signals_data/ECG_Normal.csv'
