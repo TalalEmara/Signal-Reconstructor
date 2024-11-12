@@ -103,7 +103,7 @@ class MainApp(QMainWindow):
 
     def linkingUI(self):
         self.controlBar.dataLoaded.connect(self.updateSignalData)
-        self.controlBar.dataLoaded.connect(lambda data: (self.updateSignalData(data.to_numpy()), self.updateFrequency(data.to_numpy())))
+        self.controlBar.dataLoaded.connect(lambda data: (self.updateSignalData(data.to_numpy()), self.updateMaxFrequency(data.to_numpy())))
 
 
         self.controlBar.dataLoaded.connect(self.composer.clear_table)
@@ -113,11 +113,17 @@ class MainApp(QMainWindow):
         self.samplingSlider.sliderReleased.connect(lambda: self.samplingRateInput.setValue(self.samplingSlider.value()))
 
         self.samplingSlider.valueChanged.connect(
-            lambda value: self.samplingRateInput.setValue(value) if self.samplingRateInput.value() != value else None)
+            lambda value: (
+                self.samplingRateInput.setValue(value) if self.samplingRateInput.value() != value else None,
+                self.normSamplingRateInput.setValue(value / self.signalfMax)
+            )
+        )
+
         self.samplingRateInput.valueChanged.connect(
             lambda value: (
                 self.updateSamplingRate(value),
-                self.samplingSlider.setValue(value) if self.samplingSlider.value() != value else None
+                self.samplingSlider.setValue(value) if self.samplingSlider.value() != value else None,
+
             )
         )
 
@@ -132,17 +138,16 @@ class MainApp(QMainWindow):
         # self.snrChanged.connect(self.updateNoise)
 
         # limit x
-        # self.originalSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.originalSignal))
-        # self.reconstructedSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.reconstructedSignal))
-        # self.diffrenceGraph.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.diffrenceGraph))
+        self.originalSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.originalSignal))
+        self.reconstructedSignal.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.reconstructedSignal))
+        self.diffrenceGraph.sigXRangeChanged.connect(lambda: self.limit_x_axis(self.diffrenceGraph))
 
-        # self.frequencyDomain.sigXRangeChanged.connect(lambda: self.limit_axis(self.frequencyDomain))
 
 
         # link panning
-        # self.originalSignal.sigXRangeChanged.connect(self.sync_pan)
-        # self.reconstructedSignal.sigXRangeChanged.connect(self.sync_pan)
-        # self.diffrenceGraph.sigXRangeChanged.connect(self.sync_pan)
+        self.originalSignal.sigXRangeChanged.connect(self.sync_pan)
+        self.reconstructedSignal.sigXRangeChanged.connect(self.sync_pan)
+        self.diffrenceGraph.sigXRangeChanged.connect(self.sync_pan)
 
         print("UI is linked")
 
@@ -156,9 +161,7 @@ class MainApp(QMainWindow):
         self.snrInput.setValue(30)
 
         self.samplingSlider.setValue(self.sampling_rate)
-        self.samplingSlider.setRange(1,300)
         self.samplingSlider.setSingleStep(1)
-        self.samplingRateInput.setRange(0, 300)
 
         self.normSamplingRateInput.setEnabled(False)
 
@@ -175,6 +178,7 @@ class MainApp(QMainWindow):
         super().__init__()
         self.initialize()
         self.createUI()
+        self.updateMaxFrequency(self.signalData)
 
 
         self.setWindowTitle("Signal")
@@ -325,17 +329,20 @@ class MainApp(QMainWindow):
 
         self.is_panning = True
         time_min, time_max = plot_widget.viewRange()[0]
+        amp_min, amp_max = plot_widget.viewRange()[1]
 
         if plot_widget != self.originalSignal:
             self.originalSignal.setXRange(time_min, time_max, padding=0)
+            self.originalSignal.setYRange(amp_min, amp_max, padding=0)
 
         if plot_widget != self.reconstructedSignal:
             self.reconstructedSignal.setXRange(time_min, time_max, padding=0)
+            self.reconstructedSignal.setYRange(amp_min, amp_max, padding=0)
 
         if plot_widget != self.diffrenceGraph:
             self.diffrenceGraph.setXRange(time_min, time_max, padding=0)
 
-        self.originalSignal.setXRange(7, 13)
+        # self.originalSignal.setXRange(7, 13)
         self.is_panning = False
 
     def limit_x_axis(self, plot_widget):
@@ -352,8 +359,8 @@ class MainApp(QMainWindow):
         plot_widget.setXRange(time_min, time_max, padding=0)
 
     def updateNoise(self, enabled):
-        if not self.snr_enabled:
-            self.snr_enabled = enabled
+        self.snr_enabled = enabled
+
         self.updateSignalData(self.signalData)
         # self.updateNoise(self.snrSlider.value())
 
@@ -434,16 +441,18 @@ class MainApp(QMainWindow):
             difference = calculate_difference(self.signalData[:, 1], reconstructed_amplitude)
             self.diffrenceGraph.clear()
             self.diffrenceGraph.plot(self.signalData[:, 0], difference, pen=mkPen(color="r", width=2))
+            amp_min, amp_max = self.originalSignal.viewRange()[1]
+            self.diffrenceGraph.setYRange(amp_min, amp_max, padding=0.1)
 
             # self.diffrenceGraph.setYRange(-5, 5, padding=1)
 
             self.plot_frequency_domain(reconstructed_amplitude, self.signalData[1, 0] - self.signalData[0, 0])
-    def calculate_difference(self, originalSignal, reconstructedSignalData):
-        length = max(len(originalSignal), len(reconstructedSignalData))
-        padded_originalSignal = np.pad(originalSignal, (0, length - len(originalSignal)), 'constant')
-        padded_reconstructedSignalData = np.pad(reconstructedSignalData, (0, length - len(reconstructedSignalData)),
-                                                'constant')
-        return padded_originalSignal - padded_reconstructedSignalData
+    # def calculate_difference(self, originalSignal, reconstructedSignalData):
+    #     length = max(len(originalSignal), len(reconstructedSignalData))
+    #     padded_originalSignal = np.pad(originalSignal, (0, length - len(originalSignal)), 'constant')
+    #     padded_reconstructedSignalData = np.pad(reconstructedSignalData, (0, length - len(reconstructedSignalData)),
+    #                                             'constant')
+    #     return padded_originalSignal - padded_reconstructedSignalData
 
 
     def plot_frequency_domain(self, amplitude, time_step):
@@ -526,7 +535,7 @@ class MainApp(QMainWindow):
         # Generate the mixed signal only if parameters have changed
         mixed_signal = mixer(self.signalData, amplitude, frequency, signal_type)
         self.signalData = np.column_stack((self.signalData[:, 0], mixed_signal))
-        self.updateFrequency(self.signalData)
+        self.updateMaxFrequency(self.signalData)
 
         # Clear and plot the sampled signal
         self.originalSignal.clear()
@@ -586,7 +595,7 @@ class MainApp(QMainWindow):
         old_signal = remove_elements(self.signalData, amplitude, frequency, signal_type)
 
         self.signalData = np.column_stack((self.signalData[:, 0], old_signal))
-        self.updateFrequency(self.signalData)
+        self.updateMaxFrequency(self.signalData)
         self.originalSignal.clear()
 
         self.originalSignal.plot(self.signalData[:, 0], old_signal, pen=mkPen(color="#a000c8", width=2),
@@ -619,7 +628,7 @@ class MainApp(QMainWindow):
         self.controlBar.signalNameLabel.setText("No signal Loaded ")
         self.data_loader = None
 
-    def updateFrequency(self, signal_data):
+    def updateMaxFrequency(self, signal_data):
         amplitude= signal_data[:, 1]
         amplitude_length= len(amplitude)
 
@@ -629,9 +638,11 @@ class MainApp(QMainWindow):
 
         original_positive_frequencies = original_fft_frequencies[:amplitude_length // 2]
         original_magnitudes = np.abs(original_fft_values[:amplitude_length // 2])
-        threshold = 0.1 * np.max(original_magnitudes)  # Adjust threshold as needed
+        threshold = 0.1 * np.max(original_magnitudes)
         significant_frequencies = original_positive_frequencies[original_magnitudes > threshold]
-        self.signalfMax = np.max(significant_frequencies)
+        self.signalfMax = np.ceil(np.max(significant_frequencies))
+        self.samplingSlider.setRange(1, int(self.signalfMax * 4))
+        self.samplingRateInput.setRange(1, int(self.signalfMax * 4))
         print(self.signalfMax)
 
 if __name__ == "__main__":

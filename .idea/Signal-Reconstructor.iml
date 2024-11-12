@@ -5,7 +5,7 @@
       <excludeFolder url="file://$MODULE_DIR$/GUI/Evn" />
       <excludeFolder url="file://$MODULE_DIR$/pyqt_env" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11 (pythonProject)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.11 (Signal-Reconstructor)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
