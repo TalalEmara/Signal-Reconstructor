@@ -398,8 +398,8 @@ class MainApp(QMainWindow):
     #     self.plot_frequency_domain(self.noisy_amplitude, time_step)
 
     def generate_default_data(self):  # testing
-        time = np.linspace(0, 10, 5000)
-        amplitude = np.sin(2 * np.pi * 5 * time)
+        time = np.linspace(0, 10, 4000)
+        amplitude = np.cos(2 * np.pi * 5 * time)
         return np.column_stack((time, amplitude))
 
     def updateSamplingRate(self, samplingRate):
@@ -435,7 +435,7 @@ class MainApp(QMainWindow):
             self.originalSignal.plot(time, amplitude, pen=mkPen(color="#a000c8", width=2), name="Original Signal")
             self.originalSignal.plot(self.sampledTime, self.sampledSignal, pen=None, symbol='o', symbolSize=5,symbolBrush='w')
 
-            self.reconstructedSignal.plot(time, reconstructed_amplitude, pen=mkPen(color="#a000c8", width=2),name="Reconstructed Signal")
+            self.reconstructedSignal.plot(time, reconstructed_amplitude, pen=mkPen(color=(0, 0, 255, 150), width=2),name="Reconstructed Signal")
 
 
             difference = calculate_difference(self.signalData[:, 1], reconstructed_amplitude)

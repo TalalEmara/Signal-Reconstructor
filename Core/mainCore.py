@@ -32,8 +32,10 @@ class DataLoader:
 
 
 def sinc_interp(sample_points, sample_values, interpolated_points):
-    time_diff = sample_points[1] - sample_points[0] + 1e-9
+    time_diff = sample_points[1] - sample_points[0] + 1e-9  # Small constant to prevent division by zero
+    # Vectorized computation for sinc interpolation
     return np.array([np.sum(sample_values * np.sinc((t_i - sample_points) / time_diff)) for t_i in interpolated_points])
+
 
 
 def linear_interp(sample_points, sample_values, interpolated_points):
@@ -61,12 +63,9 @@ def cubic_spline_interp(sample_points, sample_values, interpolated_points):
 
 
 
-def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
-    sample_indices = np.linspace(0, len(time) - 1, int(sampling_rate * time[-1]) ).astype(int)
-    sampled_time = time[sample_indices]
-    sampled_signal = signal[sample_indices]
-    reconstructed_signal = interp_method(sampled_time, sampled_signal, time)
-    return sampled_time, sampled_signal, reconstructed_signal
+def calculate_difference(original_signal, reconstructed_signal):
+
+    return np.abs(original_signal - reconstructed_signal)
 
 
 # def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
@@ -80,9 +79,13 @@ def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
 #         sampled_signal.extend(signal[sample_indices])
 
 
-def calculate_difference(original_signal, reconstructed_signal):
+def sample_and_reconstruct(time, signal, sampling_rate, interp_method):
 
-    return np.abs(original_signal - reconstructed_signal)
+    sample_indices = np.linspace(0, len(time) - 1, int(sampling_rate * time[-1])+1 ).astype(int)
+    sampled_time = time[sample_indices]
+    sampled_signal = signal[sample_indices]
+    reconstructed_signal = interp_method(sampled_time, sampled_signal, time)
+    return sampled_time, sampled_signal, reconstructed_signal
 
 
 # def sinc_interp(sample_points, sample_values, interpolated_points):
