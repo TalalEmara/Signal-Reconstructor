@@ -3,6 +3,8 @@
 ### Introduction
 Sampling an analog signal is an essential step in any digital signal processing system. The Nyquist–Shannon sampling theorem guarantees full recovery of the signal when sampled at a frequency greater than or equal to twice the maximum frequency of the signal. This application demonstrates the process of signal sampling and recovery, validating the importance of the Nyquist rate.
 
+![image](https://github.com/user-attachments/assets/b3dd6810-3c56-4457-92e7-4fc5e62df4f9)
+
 ### Features
 **1. Sample & Recover**
 Signal Loading: Load a mid-length signal (approximately 1000 points).
