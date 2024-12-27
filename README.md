@@ -7,10 +7,10 @@ Sampling an analog signal is an essential step in any digital signal processing 
 
 ### Features
 **1. Sample & Recover**
-Signal Loading: Load a mid-length signal (approximately 1000 points).
-Visualization: Display the original signal with markers for sampled points.
-Sampling Frequencies: Sample the signal using different frequencies (displayed as normalized or actual frequencies).
-Signal Reconstruction: Recover the original signal using the Whittaker–Shannon interpolation formula.
+Signal Loading: Load a mid-length signal (approximately 1000 points).<br>
+Visualization: Display the original signal with markers for sampled points.<br>
+Sampling Frequencies: Sample the signal using different frequencies (displayed as normalized or actual frequencies).<br>
+Signal Reconstruction: Recover the original signal using the Whittaker–Shannon interpolation formula.<br>
 Graphical Representation:
 - Original Signal with Sample Points.
 - Reconstructed Signal.
@@ -18,21 +18,21 @@ Graphical Representation:
 - Frequency Domain: Visualize the frequency spectrum to inspect aliasing effects.
 
 **2. Load & Compose**
-Signal Loading: Load signals from a file or compose them within the application.
+Signal Loading: Load signals from a file or compose them within the application.<br>
 Signal Mixer:
 - Add multiple sinusoidal signals with customizable frequencies and magnitudes.
 - Remove any component from the signal composition.
 - Default Values: Ensures no empty displays; a default signal is always visible.
 
 **3. Additive Noise**
-Add noise to the loaded signal with adjustable Signal-to-Noise Ratio (SNR).
+Add noise to the loaded signal with adjustable Signal-to-Noise Ratio (SNR).<br>
 Observe the dependency of noise effects on signal frequencies.
 
 **4. Real-time Updates**
 Sampling and recovery are performed in real time, reflecting changes instantly without requiring a refresh button.
 
 **5. Reconstruction Methods**
-Explore multiple reconstruction methods:
+Explore multiple reconstruction methods:<br>
 Whittaker–Shannon interpolation.
 Other alternative methods, with their pros and cons available for comparison.
 Select reconstruction methods via a combobox.
