@@ -1,6 +1,6 @@
 
 <h1 align="center">
-  ![task2 1](https://github.com/user-attachments/assets/5012a474-6d45-4f61-9d25-b37eb1aeb38b)
+![task2 1](https://github.com/user-attachments/assets/d6dfc90b-101c-4fb6-ad29-cf7cf0564bd5)
 </h1>
 
 <h1 align="center">ReSigni</h1>
@@ -93,8 +93,9 @@ This will start the **ReSigni** application locally.
 
 ## Developers
 
-| [**Talal Emara**](https://github.com/TalalEmara) | [**Meram Mahmoud**](https://github.com/Meram-Mahmoud) | [**Maya Mohammed**](https://github.com/Mayamohamed207) | [**Nouran Hani**](https://github.com/Nouran-Hani) | [**Nariman Ahmed**](https://github.com/nariman-ahmed)
-|:------------------------------------------:|:------------------------------------------:|:------------------------------------------:|:------------------------------------------:|
+| [**Talal Emara**](https://github.com/TalalEmara) | [**Meram Mahmoud**](https://github.com/Meram-Mahmoud) | [**Maya Mohammed**](https://github.com/Mayamohamed207) | [**Nouran Hani**](https://github.com/Nouran-Hani) | [**Nariman Ahmed**](https://github.com/nariman-ahmed) |
+|:------------------------------------------:|:------------------------------------------:|:------------------------------------------:|:------------------------------------------:|:------------------------------------------:|
+
 
 ---
 
