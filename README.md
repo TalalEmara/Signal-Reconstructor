@@ -1,6 +1,6 @@
 
 <h1 align="center">
-![task2 1](https://github.com/user-attachments/assets/d6dfc90b-101c-4fb6-ad29-cf7cf0564bd5)
+    <img alt="project" title="#About" src="Readme/main.gif" />
 </h1>
 
 <h1 align="center">ReSigni</h1>
