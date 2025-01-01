@@ -1,41 +1,108 @@
-## Sampling-Theory Studio
 
-### Introduction
-Sampling an analog signal is an essential step in any digital signal processing system. The Nyquist–Shannon sampling theorem guarantees full recovery of the signal when sampled at a frequency greater than or equal to twice the maximum frequency of the signal. This application demonstrates the process of signal sampling and recovery, validating the importance of the Nyquist rate.
+<h1 align="center">
+![task2 1](https://github.com/user-attachments/assets/d6dfc90b-101c-4fb6-ad29-cf7cf0564bd5)
+</h1>
 
-![image](https://github.com/user-attachments/assets/b3dd6810-3c56-4457-92e7-4fc5e62df4f9)
+<h1 align="center">ReSigni</h1>
+<h3 align="center">Real time signal reconstructor</h3>
 
-### Features
-**1. Sample & Recover**<br>
-Signal Loading: Load a mid-length signal (approximately 1000 points).<br>
-Visualization: Display the original signal with markers for sampled points.<br>
-Sampling Frequencies: Sample the signal using different frequencies (displayed as normalized or actual frequencies).<br>
-Signal Reconstruction: Recover the original signal using the Whittaker–Shannon interpolation formula.<br>
-Graphical Representation:<br>
-- Original Signal with Sample Points.
-- Reconstructed Signal.
-- Difference Signal: Display the error between the original and reconstructed signals.
-- Frequency Domain: Visualize the frequency spectrum to inspect aliasing effects.
+<h4 align="center"> 
+	 Status: Finished
+</h4>
 
-**2. Load & Compose**<br>
-Signal Loading: Load signals from a file or compose them within the application.<br>
-Signal Mixer:<br>
-- Add multiple sinusoidal signals with customizable frequencies and magnitudes.
-- Remove any component from the signal composition.
-- Default Values: Ensures no empty displays; a default signal is always visible.
+<p align="center">
+ <a href="#about">About</a> •
+ <a href="#features">Features</a> •
+ <a href="#how-it-works">How it works</a> • 
+ <a href="#tech-stack">Tech Stack</a> •  
+ <a href="#developers">Developers</a>
+</p>
 
-**3. Additive Noise**<br>
-Add noise to the loaded signal with adjustable Signal-to-Noise Ratio (SNR).<br>
-Observe the dependency of noise effects on signal frequencies.
+# About
+**Resigni** is a Python-based desktop application built with PyQt5 that reconstructs a given signal using the Nyquist Principle. The application provides intuitive visualization of the reconstructed signal, its frequency components, and an error graph to evaluate reconstruction accuracy.
 
-**4. Real-time Updates**<br>
-Sampling and recovery are performed in real time, reflecting changes instantly without requiring a refresh button.
+---
 
-**5. Reconstruction Methods**<br>
-Explore multiple reconstruction methods:<br>
-- Whittaker–Shannon interpolation.<br>
-- Cubic spline
-- Zero-order hold
-- Linear
-Select reconstruction methods via a combobox.
+## Features
 
+- **Signal Sampling & Signal Mixer**: Mix multiple sinusoidal signals with different frequencies and magnitude and recover the original signal.
+![task2 2](https://github.com/user-attachments/assets/decfe128-3838-4026-9b43-0697383671d5)
+  
+- **Interpolation Methods**: Reconstruct the original signal using different interpolation methods.
+  ![task2 3](https://github.com/user-attachments/assets/a7757437-87b6-47d6-b596-4d116c321ff9)
+  
+- **Adding Noise**: adding noise to the original signal with differnet SNR values.
+![task2 4](https://github.com/user-attachments/assets/8a31f909-dd5f-499a-8976-c8f071c4407a)
+
+
+## Tech Stack
+
+The following tools were used in the construction of the project:
+
+- **[Python](https://www.python.org/)**
+- **[PyQt5](https://riverbankcomputing.com/software/pyqt/intro)**
+- **[PyQtGraph](https://www.pyqtgraph.org/)**
+- **[NumPy](https://numpy.org/)**
+
+---
+
+
+## How it Works
+
+The application is built with **Python** and **PyQt5**. It allows the user to add different signals using the composer and change the value of the sampling frequency to see real time sampling.
+
+
+### Pre-requisites
+
+Before running the application, make sure you have **Python** installed on your system. You will also need **pip** for installing dependencies.
+
+---
+
+## How to Run the Project Locally
+
+To run the project locally, follow these steps:
+
+### Steps:
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/your-username/Signal-Reconstructor.git]
+   ```
+
+2. **Navigate to the project folder:**
+   ```bash
+   Signal-Reconstructor
+   ```
+
+
+3. **Install the required dependencies:**
+   ```bash
+   pyqt5
+   pyqtgraph
+   numpy
+   ```
+
+5. **Run the application:**
+   ```bash
+   python main.py
+   ```
+
+This will start the **ReSigni** application locally.
+
+---
+
+## Developers
+
+| [**Talal Emara**](https://github.com/TalalEmara) | [**Meram Mahmoud**](https://github.com/Meram-Mahmoud) | [**Maya Mohammed**](https://github.com/Mayamohamed207) | [**Nouran Hani**](https://github.com/Nouran-Hani) | [**Nariman Ahmed**](https://github.com/nariman-ahmed) |
+|:------------------------------------------:|:------------------------------------------:|:------------------------------------------:|:------------------------------------------:|:------------------------------------------:|
+
+
+---
+
+
+## Learn More
+
+To learn more about PyQt5 and PyQtGraph, check out their official documentation:
+
+- [PyQt5 Documentation](https://riverbankcomputing.com/software/pyqt/intro)
+- [PyQtGraph Documentation](https://www.pyqtgraph.org/)
